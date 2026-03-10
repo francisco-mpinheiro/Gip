@@ -1,5 +1,4 @@
-export interface CadastroDTO{
-
+export interface CadastroDTO {
     nome: string;
     email: string;
     senha: string;
