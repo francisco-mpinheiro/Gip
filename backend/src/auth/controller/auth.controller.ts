@@ -10,8 +10,6 @@ export class AuthController {
     @Post("cadastro")
     async cadastro(@Body() body : CadastroDTO){
         await this.authService.cadastro(body);
-
-        return body;
     }
 
     // Login
