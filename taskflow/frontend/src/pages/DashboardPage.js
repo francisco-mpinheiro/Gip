@@ -51,42 +51,36 @@ export default function DashboardPage() {
     <AppLayout>
       <div className="page-header">
         <h1>Dashboard</h1>
-        <p>Bem-vindo de volta! Aqui está um resumo da sua equipe.</p>
+       
       </div>
 
       {/* METRIC CARDS */}
       <div className="metric-cards">
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-icon blue">📁</div>
-            <span className="metric-trend up">↑ +2</span>
+            <div className="metric-label"> Ativos</div>
+            
           </div>
-          <div className="metric-value">{metrics?.activeProjects ?? 0}</div>
-          <div className="metric-label">Projetos Ativos</div>
+          
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-icon green">✅</div>
-            <span className="metric-trend up">↑ +18%</span>
+            <div className="metric-label">Tarefas Concluídas</div>
+            
           </div>
-          <div className="metric-value">{metrics?.completedTasks ?? 0}</div>
-          <div className="metric-label">Tarefas Concluídas</div>
+          
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-icon amber">👥</div>
-            <span className="metric-trend up">↑ +4</span>
+            <div className="metric-label">Membros da Equipe</div>
           </div>
-          <div className="metric-value">{metrics?.totalMembers ?? 0}</div>
-          <div className="metric-label">Membros da Equipe</div>
+          
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-icon red">⏰</div>
-            <span className="metric-trend down">↓ -5%</span>
+            <div className="metric-label">Horas Trabalhadas</div>
           </div>
-          <div className="metric-value">{(metrics?.hoursWorked ?? 0).toLocaleString('pt-BR')}</div>
-          <div className="metric-label">Horas Trabalhadas</div>
+          
         </div>
       </div>
 
@@ -153,23 +147,10 @@ export default function DashboardPage() {
         <div className="card">
           <div className="card-header">
             <span className="card-title">Atividade da Semana</span>
-            <span style={{ fontSize: 12, color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', gap: 4 }}>
-              ∿ {metrics?.completedTasks} tarefas
-            </span>
+            
           </div>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Tarefas concluídas por dia</p>
-          <div className="chart-bars">
-            {weeklyActivity?.map((d, i) => (
-              <div key={i} className="chart-bar-wrap">
-                <div
-                  className="chart-bar"
-                  style={{ height: `${Math.max((d.count / maxActivity) * 64, 4)}px` }}
-                  title={`${d.count} atividades`}
-                />
-                <span className="chart-day">{d.day}</span>
-              </div>
-            ))}
-          </div>
+          
+         
         </div>
 
         <div className="card">

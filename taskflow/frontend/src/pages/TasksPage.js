@@ -134,7 +134,7 @@ export default function TasksPage() {
       {/* FILTERS */}
       <div className="filter-bar">
         <div className="filter-search">
-          <span className="filter-search-icon">🔍</span>
+        
           <input placeholder="Buscar tarefas..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
@@ -203,7 +203,7 @@ export default function TasksPage() {
         <div className="card">
           {filtered.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">✅</div>
+           
               <p>Nenhuma tarefa encontrada</p>
             </div>
           ) : (

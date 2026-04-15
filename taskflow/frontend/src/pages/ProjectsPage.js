@@ -107,7 +107,7 @@ export default function ProjectsPage() {
       {/* FILTER BAR */}
       <div className="filter-bar">
         <div className="filter-search">
-          <span className="filter-search-icon">🔍</span>
+         
           <input
             placeholder="Buscar projetos..."
             value={search}
@@ -123,13 +123,23 @@ export default function ProjectsPage() {
       {loading ? (
         <div className="loading"><div className="spinner" />Carregando...</div>
       ) : filtered.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">📁</div>
-          <p>Nenhum projeto encontrado</p>
-          {canDo('create_project') && (
-            <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={openCreate}>+ Criar Projeto</button>
-          )}
-        </div>
+    <div className="empty-state">
+  <div className="empty-state-icon">
+    <i className="bi bi-folder"></i>
+  </div>
+
+  <p>Nenhum projeto encontrado</p>
+
+  {canDo('create_project') && (
+    <button
+      className="btn btn-primary"
+      style={{ marginTop: 16 }}
+      onClick={openCreate}
+    >
+      + Criar Projeto
+    </button>
+  )}
+</div>
       ) : (
         <div className="projects-grid">
           {filtered.map(p => {
