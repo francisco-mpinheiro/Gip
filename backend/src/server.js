@@ -21,7 +21,7 @@ app.use((err, req, res, next) => {
 
 seedDatabase().then(() => {
   app.listen(PORT, () => {
-    console.log(`\n🚀 TaskFlow API rodando em http://localhost:${PORT}`);
+    console.log(`\n🚀 GIP API rodando em http://localhost:${PORT}`);
     console.log(`\n📋 Usuários de teste:`);
     console.log(`   admin@taskflow.com  → Admin Plataforma`);
     console.log(`   carlos@empresa.com  → Admin Empresa`);
