@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const { db } = require('../config/database');
+const prisma = require('../config/prisma');
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Token de autenticação requerido' });
@@ -10,13 +10,14 @@ const authenticate = (req, res, next) => {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = db.users.find(u => u.id === decoded.id);
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    
     if (!user || !user.active) {
       return res.status(401).json({ message: 'Usuário não encontrado ou inativo' });
     }
     req.user = user;
     next();
-  } catch {
+  } catch (err) {
     return res.status(401).json({ message: 'Token inválido ou expirado' });
   }
 };

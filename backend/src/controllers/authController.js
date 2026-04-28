@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const { db, ROLES } = require('../config/database');
+const { ROLES } = require('../config/database');
+const prisma = require('../config/prisma');
 
 const generateToken = (user) =>
   jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
@@ -21,9 +22,11 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Email e senha são obrigatórios' });
     }
 
-    const user = db.users.find(
-      u => u.email === email || u.cpf === email
-    );
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ email }, { cpf: email }]
+      }
+    });
 
     if (!user) return res.status(401).json({ message: 'Credenciais inválidas' });
     if (!user.active) return res.status(401).json({ message: 'Usuário desativado. Contate o administrador.' });
@@ -46,26 +49,30 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'Nome, email e senha são obrigatórios' });
     }
 
-    const exists = db.users.find(u => u.email === email || (cpf && u.cpf === cpf));
+    const exists = await prisma.user.findFirst({
+      where: {
+        OR: [{ email }, { cpf: cpf || '' }]
+      }
+    });
+
     if (exists) return res.status(400).json({ message: 'Email ou CPF já cadastrado' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const initials = name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
-    const newUser = {
-      id: uuidv4(),
-      name,
-      email,
-      cpf: cpf || '',
-      password: hashedPassword,
-      role: role || ROLES.EMPLOYEE,
-      department: department || 'Geral',
-      avatar: initials,
-      active: true,
-      createdAt: new Date(),
-    };
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        cpf: cpf || '',
+        password: hashedPassword,
+        role: role || ROLES.EMPLOYEE,
+        department: department || 'Geral',
+        avatar: initials,
+        active: true,
+      }
+    });
 
-    db.users.push(newUser);
     const token = generateToken(newUser);
     res.status(201).json({ token, user: sanitizeUser(newUser) });
   } catch (err) {

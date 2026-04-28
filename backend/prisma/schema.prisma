@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma" // Descomente se ainda precisar da saída customizada
+}
+
+datasource db {
+  provider = "postgresql"
+ 
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  admin_platform
+  admin_company
+  manager_area
+  project_manager
+  employee
+}
+
+// ─── MODELS ──────────────────────────────────────────────────────────────────
+
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  cpf        String   @unique
+  password   String
+  role       Role     @default(employee)
+  department String?  // Opcional, pois nem todo usuário tem (ex: Admin Plataforma)
+  avatar     String?  // Opcional
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt // Gerenciado automaticamente pelo Prisma
+
+  // Relacionamentos sugeridos
+  managedProjects Project[] @relation("ProjectManager")
+  memberProjects  Project[] @relation("ProjectMembers")
+  tasks           Task[]
+  activities      Activity[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  status      String   @default("planejamento")
+  priority    String   @default("media")
+  progress    Int      @default(0)
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  managerId   String
+  manager     User     @relation("ProjectManager", fields: [managerId], references: [id])
+  
+  members     User[]   @relation("ProjectMembers")
+  
+  tasks       Task[]
+  activities  Activity[]
+
+  @@map("projects")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  status      String   @default("a_fazer")
+  priority    String   @default("media")
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  
+  assigneeId  String?
+  assignee    User?    @relation(fields: [assigneeId], references: [id])
+  
+  activities  Activity[]
+
+  @@map("tasks")
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  action      String
+  target      String
+  createdAt   DateTime @default(now())
+
+  // Relacionamentos
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  taskId      String?
+  task        Task?    @relation(fields: [taskId], references: [id])
+
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id])
+
+  @@map("activities")
+}

@@ -1,0 +1,16 @@
+services:
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: gip-db
+    environment:
+      - POSTGRES_USER=gip_user
+      - POSTGRES_PASSWORD=gip123
+      - POSTGRES_DB=gip_database
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
