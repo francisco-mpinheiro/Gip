@@ -343,7 +343,7 @@ function RegisterForm({ onSuccess, onBack }) {
       {f("Nome completo", "name", "text", "Seu nome")}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {f("Email", "email", "email", "seu@email.com")}
-        {f("CPF (opcional)", "cpf", "text", "000.000.000-00", false)}
+        {f("CPF", "cpf", "text", "000.000.000-00", false)}
       </div>
       {f("Departamento", "department", "text", "TI, Design, RH...", false)}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
