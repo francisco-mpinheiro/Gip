@@ -118,8 +118,8 @@ export default function UsersPage() {
           <input placeholder="Buscar usuários..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="filter-select" value={filterRole} onChange={e => setFilterRole(e.target.value)}>
-          <option value="">Todos os papéis</option>
-          {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+          <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Todos os papéis</option>
+          {ROLES.map(r => <option key={r.value} value={r.value} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{r.label}</option>)}
         </select>
       </div>
 
@@ -228,7 +228,7 @@ export default function UsersPage() {
                   <div className="form-group">
                     <label className="form-label">Papel / Função *</label>
                     <select className="form-select" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
-                      {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                      {ROLES.map(r => <option key={r.value} value={r.value} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{r.label}</option>)}
                     </select>
                   </div>
                   <div className="form-group">

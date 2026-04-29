@@ -22,7 +22,7 @@ const ROLE_LABELS = {
 // ─── SEED DATA ────────────────────────────────────────────────────────────────
 async function seedDatabase() {
   const password = await bcrypt.hash('123456', 10);
-  
+
   const count = await prisma.user.count();
   if (count > 0) return;
 

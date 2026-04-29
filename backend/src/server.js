@@ -7,12 +7,12 @@ const routes = require('./routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: '*', methods: ['GET','POST','PUT','PATCH','DELETE'], allowedHeaders: ['Content-Type','Authorization'] }));
+app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json());
 
 app.use('/api', routes);
 
-app.get('/health', (_, res) => res.json({ status: 'ok', message: 'TaskFlow API running' }));
+app.get('/health', (_, res) => res.json({ status: 'ok', message: 'GIP API running' }));
 app.use((req, res) => res.status(404).json({ message: 'Rota não encontrada' }));
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -23,7 +23,7 @@ seedDatabase().then(() => {
   app.listen(PORT, () => {
     console.log(`\n🚀 GIP API rodando em http://localhost:${PORT}`);
     console.log(`\n📋 Usuários de teste:`);
-    console.log(`   admin@taskflow.com  → Admin Plataforma`);
+    console.log(`   admin@gip.com  → Admin Plataforma`);
     console.log(`   carlos@empresa.com  → Admin Empresa`);
     console.log(`   ana@empresa.com     → Gestora de Área`);
     console.log(`   bruno@empresa.com   → Gerente de Projeto`);

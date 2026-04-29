@@ -107,39 +107,39 @@ export default function ProjectsPage() {
       {/* FILTER BAR */}
       <div className="filter-bar">
         <div className="filter-search">
-         
+
           <input
             placeholder="Buscar projetos..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value="">Todos os status</option>
-          {STATUS_OPTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+        <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+          <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Todos os status</option>
+          {STATUS_OPTS.map(s => <option key={s.value} value={s.value} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{s.label}</option>)}
         </select>
       </div>
 
       {loading ? (
         <div className="loading"><div className="spinner" />Carregando...</div>
       ) : filtered.length === 0 ? (
-    <div className="empty-state">
-  <div className="empty-state-icon">
-    <i className="bi bi-folder"></i>
-  </div>
+        <div className="empty-state">
+          <div className="empty-state-icon">
+            <i className="bi bi-folder"></i>
+          </div>
 
-  <p>Nenhum projeto encontrado</p>
+          <p>Nenhum projeto encontrado</p>
 
-  {canDo('create_project') && (
-    <button
-      className="btn btn-primary"
-      style={{ marginTop: 16 }}
-      onClick={openCreate}
-    >
-      + Criar Projeto
-    </button>
-  )}
-</div>
+          {canDo('create_project') && (
+            <button
+              className="btn btn-primary"
+              style={{ marginTop: 16 }}
+              onClick={openCreate}
+            >
+              + Criar Projeto
+            </button>
+          )}
+        </div>
       ) : (
         <div className="projects-grid">
           {filtered.map(p => {
@@ -213,14 +213,14 @@ export default function ProjectsPage() {
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">Status</label>
-                    <select className="form-select" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-                      {STATUS_OPTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    <select className="form-select" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+                      {STATUS_OPTS.map(s => <option key={s.value} value={s.value} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{s.label}</option>)}
                     </select>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Prioridade</label>
-                    <select className="form-select" value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}>
-                      {PRIORITY_OPTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    <select className="form-select" value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+                      {PRIORITY_OPTS.map(s => <option key={s.value} value={s.value} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{s.label} </option>)}
                     </select>
                   </div>
                 </div>
@@ -236,9 +236,9 @@ export default function ProjectsPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Gerente do Projeto</label>
-                  <select className="form-select" value={form.managerId} onChange={e => setForm(f => ({ ...f, managerId: e.target.value }))}>
-                    <option value="">Selecionar...</option>
-                    {users.filter(u => u.active).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                  <select className="form-select" value={form.managerId} onChange={e => setForm(f => ({ ...f, managerId: e.target.value }))} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+                    <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Selecionar...</option>
+                    {users.filter(u => u.active).map(u => <option key={u.id} value={u.id} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{u.name}</option>)}
                   </select>
                 </div>
                 <div className="form-group">

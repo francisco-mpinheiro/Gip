@@ -1,4 +1,4 @@
-# ⚡ TaskFlow MVP
+# ⚡ GIP MVP
 
 Plataforma completa de gestão de projetos e equipes com RBAC, Kanban e dashboard de desempenho.
 
@@ -10,12 +10,22 @@ Plataforma completa de gestão de projetos e equipes com RBAC, Kanban e dashboar
 - Node.js 18+
 - npm ou yarn
 
-### 1. Backend (API)
+### 1. Banco de Dados e Backend (API)
 
+O projeto utiliza Node.js com PostgreSQL e Prisma ORM.
+
+**Subindo o Banco de Dados (via Docker):**
+```bash
+cd backend/infra
+docker compose up -d
+```
+
+**Rodando a API:**
 ```bash
 cd backend
 npm install
-npm run dev
+npx prisma db push   # Cria as tabelas no banco de dados
+npm run dev          # Inicia o servidor e popula o banco (seed)
 # API rodando em http://localhost:5000
 ```
 
@@ -34,7 +44,7 @@ npm start
 
 | Email | Papel | Senha |
 |-------|-------|-------|
-| admin@taskflow.com | Admin da Plataforma | 123456 |
+| admin@gip.com | Admin da Plataforma | 123456 |
 | carlos@empresa.com | Admin da Empresa | 123456 |
 | ana@empresa.com | Gestora de Área | 123456 |
 | bruno@empresa.com | Gerente de Projeto | 123456 |
@@ -45,11 +55,11 @@ npm start
 ## 🏗 Estrutura do Projeto
 
 ```
-taskflow/
+gip/
 ├── backend/
 │   ├── src/
 │   │   ├── config/
-│   │   │   └── database.js        # Banco em memória + seed
+│   │   │   └── database.js        # Conexão Prisma + seed
 │   │   ├── controllers/
 │   │   │   ├── authController.js
 │   │   │   ├── usersController.js
@@ -167,14 +177,6 @@ taskflow/
 - [x] Perfil editável
 - [x] Configurações com toggles
 - [x] Filtros e busca em todas as páginas
-- [x] Banco de dados em memória com seed
+- [x] Persistência de dados com PostgreSQL e Prisma ORM
 
----
 
-## 🗄 Para produção: trocar banco em memória
-
-O banco atual é **in-memory** (reinicia os dados quando o servidor reinicia). Para persistência, substitua `src/config/database.js` por:
-
-- **MongoDB + Mongoose** (recomendado)
-- **PostgreSQL + Sequelize/Prisma**
-- **SQLite** (mais leve para MVPs iniciais)

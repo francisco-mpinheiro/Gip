@@ -31,7 +31,7 @@ const FEATURES = [
 ];
 
 const DEMO_USERS = [
-  { label: "Admin Plataforma", email: "admin@taskflow.com", color: "#ef4444" },
+  { label: "Admin Plataforma", email: "admin@gip.com", color: "#ef4444" },
   { label: "Admin Empresa", email: "carlos@empresa.com", color: "#f59e0b" },
   { label: "Gestora de Área", email: "ana@empresa.com", color: "#8b5cf6" },
   { label: "Gerente Projeto", email: "bruno@empresa.com", color: "#3b82f6" },
@@ -125,9 +125,8 @@ export default function LoginPage() {
           >
             <div style={css.cardIcon}>
               <i
-                className={`bi ${
-                  mode === "login" ? "bi-box-arrow-in-right" : "bi-person-plus"
-                }`}
+                className={`bi ${mode === "login" ? "bi-box-arrow-in-right" : "bi-person-plus"
+                  }`}
               ></i>
             </div>
           </div>
@@ -297,47 +296,46 @@ function RegisterForm({ onSuccess, onBack }) {
     }
   };
 
- const f = (label, key, type, placeholder, required = true) => (
-  <div style={css.fieldGroup} key={key}>
-    <label style={css.label}>{label}</label>
+  const f = (label, key, type, placeholder, required = true) => (
+    <div style={css.fieldGroup} key={key}>
+      <label style={css.label}>{label}</label>
 
-    <div style={css.inputWrap}>
-      <span style={css.inputIcon}>
-        <i
-          className={`bi ${
-            type === "password"
-              ? "bi-lock"
-              : type === "email"
-              ? "bi-envelope"
-              : "bi-person"
-          }`}
-        ></i>
-      </span>
+      <div style={css.inputWrap}>
+        <span style={css.inputIcon}>
+          <i
+            className={`bi ${type === "password"
+                ? "bi-lock"
+                : type === "email"
+                  ? "bi-envelope"
+                  : "bi-person"
+              }`}
+          ></i>
+        </span>
 
-      <input
-        style={css.input}
-        type={type === "password" ? (showPass ? "text" : "password") : type}
-        placeholder={placeholder}
-        value={form[key]}
-        onChange={(e) =>
-          setForm((p) => ({ ...p, [key]: e.target.value }))
-        }
-        required={required}
-      />
+        <input
+          style={css.input}
+          type={type === "password" ? (showPass ? "text" : "password") : type}
+          placeholder={placeholder}
+          value={form[key]}
+          onChange={(e) =>
+            setForm((p) => ({ ...p, [key]: e.target.value }))
+          }
+          required={required}
+        />
 
-      {type === "password" && key === "password" && (
-        <button
-          type="button"
-          style={css.eyeBtn}
-          onClick={() => setShow((v) => !v)}
-          aria-label={showPass ? "Ocultar senha" : "Mostrar senha"}
-        >
-          <i className={`bi ${showPass ? "bi-eye-slash" : "bi-eye"}`}></i>
-        </button>
-      )}
+        {type === "password" && key === "password" && (
+          <button
+            type="button"
+            style={css.eyeBtn}
+            onClick={() => setShow((v) => !v)}
+            aria-label={showPass ? "Ocultar senha" : "Mostrar senha"}
+          >
+            <i className={`bi ${showPass ? "bi-eye-slash" : "bi-eye"}`}></i>
+          </button>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 
   return (
     <form onSubmit={handleSubmit}>

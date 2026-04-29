@@ -1,7 +1,7 @@
 {
-  "name": "taskflow-mvp",
+  "name": "Gip",
   "version": "1.0.0",
-  "description": "TaskFlow – MVP completo de gestão de projetos e equipes",
+  "description": "Gip – MVP completo de gestão de projetos e equipes",
   "scripts": {
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "dev:backend": "cd backend && npm run dev",
