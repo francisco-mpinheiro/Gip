@@ -80,11 +80,35 @@ exports.getDashboard = async (req, res) => {
       tasks: undefined
     }));
 
+    const todayForWeek = new Date();
+    const dayOfWeek = todayForWeek.getDay();
+    const diffToMonday = todayForWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    
+    const startOfWeek = new Date(todayForWeek);
+    startOfWeek.setDate(diffToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
     const recentActivities = await prisma.activity.findMany({
-      take: 10,
+      where: {
+        createdAt: {
+          gte: startOfWeek,
+          lte: endOfWeek,
+        }
+      },
       orderBy: { createdAt: 'desc' },
-      include: { user: { select: { id: true, name: true, avatar: true } } }
+      include: { 
+        user: { select: { id: true, name: true, avatar: true } },
+        project: { select: { id: true, name: true } }
+      }
     });
+
+    const tasksThisWeek = tasks
+      .filter(t => t.dueDate && new Date(t.dueDate) >= startOfWeek && new Date(t.dueDate) <= endOfWeek)
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 
     res.json({
       metrics: {
@@ -94,7 +118,7 @@ exports.getDashboard = async (req, res) => {
         totalMembers:    membersCount,
         hoursWorked:     1248,
       },
-      recentProjects, recentTasks, recentActivities, weeklyActivity,
+      recentProjects, recentTasks, recentActivities, weeklyActivity, tasksThisWeek,
     });
   } catch (err) {
     res.status(500).json({ message: 'Erro interno' });

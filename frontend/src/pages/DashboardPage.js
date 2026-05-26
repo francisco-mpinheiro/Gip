@@ -44,43 +44,53 @@ export default function DashboardPage() {
     </AppLayout>
   );
 
-  const { metrics, recentProjects, recentTasks, recentActivities, weeklyActivity } = data || {};
-  const maxActivity = Math.max(...(weeklyActivity || []).map(d => d.count), 1);
+  const { metrics, recentProjects, recentTasks, recentActivities, tasksThisWeek } = data || {};
+
 
   return (
     <AppLayout>
       <div className="page-header">
         <h1>Dashboard</h1>
-       
+
       </div>
 
       {/* METRIC CARDS */}
       <div className="metric-cards">
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-label"> Ativos</div>
-            
+            <div className="metric-label" style={{ marginTop: 0 }}>Projetos Ativos</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
+              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-blue)' }}>rocket_launch</span>
+            </div>
           </div>
-          
+          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: '#fff' }}>{metrics?.activeProjects || 0}</div>
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-label">Tarefas Concluídas</div>
-            
+            <div className="metric-label" style={{ marginTop: 0 }}>Tarefas<br />Concluídas</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
+              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>task_alt</span>
+            </div>
           </div>
-          
+          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: '#fff' }}>{metrics?.completedTasks || 0}</div>
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-label">Membros da Equipe</div>
+            <div className="metric-label" style={{ marginTop: 0 }}>Membros da<br />Equipe</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
+              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-amber)' }}>groups</span>
+            </div>
           </div>
-          
+          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: '#fff' }}>{metrics?.totalMembers || 0}</div>
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-label">Horas Trabalhadas</div>
+            <div className="metric-label" style={{ marginTop: 0 }}>Horas<br />Trabalhadas</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
+              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-blue)' }}>schedule</span>
+            </div>
           </div>
-          
+          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: '#fff' }}>{metrics?.hoursWorked || 0}h</div>
         </div>
       </div>
 
@@ -144,26 +154,53 @@ export default function DashboardPage() {
 
       {/* ACTIVITY CHART + RECENT ACTIVITY */}
       <div className="grid-2">
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">Atividade da Semana</span>
-            
+        <div className="card" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+          <div className="card-header" style={{ position: 'sticky', top: 0, backgroundColor: 'inherit', zIndex: 1, paddingBottom: '10px' }}>
+            <span className="card-title">Atividades da Semana</span>
           </div>
-          
-         
+          <div className="tasks-this-week-list" style={{ marginTop: '20px' }}>
+            {tasksThisWeek?.length === 0 && (
+              <div className="empty-state">
+                <p>Nenhuma atividade programada para esta semana.</p>
+              </div>
+            )}
+            {tasksThisWeek?.map(t => (
+              <div key={t.id} className="task-item">
+                <div className={`task-checkbox ${t.status === 'concluido' ? 'checked' : ''}`} />
+                <div className="task-content">
+                  <div className={`task-title ${t.status === 'concluido' ? 'done' : ''}`}>{t.title}</div>
+                  <div className="task-meta">
+                    {t.project && <span className="task-project">{t.project.name}</span>}
+                    <span className="task-date">
+                      Prazo: {new Date(t.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+                <span className={`badge ${STATUS_CLASS[t.status]}`} style={{ fontSize: 10.5, flexShrink: 0 }}>
+                  {STATUS_LABEL[t.status] || t.status}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">Atividades Recentes</span>
+        <div className="card" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+          <div className="card-header" style={{ position: 'sticky', top: 0, backgroundColor: 'inherit', zIndex: 1, paddingBottom: '10px' }}>
+            <span className="card-title">Histórico de Atividades</span>
           </div>
-          {recentActivities?.slice(0, 6).map(a => (
+          {recentActivities?.length === 0 && (
+            <div className="empty-state" style={{ marginTop: '20px' }}>
+              <p>Nenhuma atividade registrada nesta semana.</p>
+            </div>
+          )}
+          {recentActivities?.map(a => (
             <div key={a.id} className="activity-item">
               <div className="avatar sm">{a.user?.avatar || '?'}</div>
               <div>
                 <div className="activity-text">
                   <strong>{a.user?.name?.split(' ')[0]}</strong> {a.action}{' '}
                   <strong>{a.target}</strong>
+                  {a.project && <span> em <strong>{a.project.name}</strong></span>}
                 </div>
                 <div className="activity-time">{timeAgo(a.createdAt)}</div>
               </div>
