@@ -30,6 +30,7 @@ export default function TasksPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
+  const [filterMine, setFilterMine] = useState(false);
   const [dragging, setDragging] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -119,7 +120,8 @@ export default function TasksPage() {
       t.project?.name?.toLowerCase().includes(search.toLowerCase());
     const st = filterStatus ? t.status === filterStatus : true;
     const pr = filterPriority ? t.priority === filterPriority : true;
-    return s && st && pr;
+    const my = filterMine ? t.assigneeId === user?.id : true;
+    return s && st && pr && my;
   });
 
   const tasksByCol = COLUMNS.reduce((acc, col) => {
@@ -176,6 +178,14 @@ export default function TasksPage() {
           <option value="media" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Média</option>
           <option value="baixa" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Baixa</option>
         </select>
+        <button 
+          className={`btn btn-sm ${filterMine ? 'btn-primary' : 'btn-ghost'}`} 
+          style={{ padding: '6px 12px', border: filterMine ? 'none' : '1px solid var(--border)' }}
+          onClick={() => setFilterMine(!filterMine)}
+          title="Mostrar apenas as tarefas atribuídas a mim"
+        >
+          Minhas Tarefas
+        </button>
       </div>
 
       {loading ? (
