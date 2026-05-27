@@ -31,6 +31,9 @@ export default function TasksPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [dragging, setDragging] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -41,7 +44,19 @@ export default function TasksPage() {
   };
   useEffect(load, []);
 
-  const openCreate = () => { setEditing(null); setForm(emptyForm); setModal(true); };
+  const loadComments = async (taskId) => {
+    setLoadingComments(true);
+    try {
+      const res = await tasksAPI.getComments(taskId);
+      setComments(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const openCreate = () => { setEditing(null); setForm(emptyForm); setModal(true); setComments([]); setNewComment(''); };
   const openEdit = (t) => {
     setEditing(t);
     setForm({
@@ -50,7 +65,21 @@ export default function TasksPage() {
       status: t.status, priority: t.priority,
       dueDate: t.dueDate ? t.dueDate.slice(0, 10) : '',
     });
+    setComments([]);
+    setNewComment('');
     setModal(true);
+    loadComments(t.id);
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    try {
+      await tasksAPI.addComment(editing.id, newComment);
+      setNewComment('');
+      loadComments(editing.id);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erro ao adicionar comentário');
+    }
   };
 
   const handleSave = async (e) => {
@@ -333,6 +362,47 @@ export default function TasksPage() {
                   <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Salvando...' : (editing ? 'Salvar' : 'Criar Tarefa')}</button>
                 </div>
               </form>
+
+              {editing && (
+                <div style={{ marginTop: 24, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                  <h4 style={{ fontSize: 16, marginBottom: 12 }}>Comentários</h4>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                    <input 
+                      className="form-input" 
+                      placeholder="Adicione um comentário..." 
+                      value={newComment} 
+                      onChange={e => setNewComment(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddComment();
+                        }
+                      }}
+                    />
+                    <button type="button" className="btn btn-primary" onClick={handleAddComment}>Enviar</button>
+                  </div>
+                  {loadingComments ? (
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Carregando...</div>
+                  ) : comments.length === 0 ? (
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Nenhum comentário ainda.</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 200, overflowY: 'auto', paddingRight: 4 }}>
+                      {comments.map(c => (
+                        <div key={c.id} style={{ display: 'flex', gap: 10, background: 'var(--bg-input)', padding: 10, borderRadius: 8 }}>
+                          <div className="avatar sm" title={c.user?.name}>{c.user?.avatar || c.user?.name[0]}</div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: 13, fontWeight: 600 }}>{c.user?.name}</span>
+                              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(c.createdAt).toLocaleString('pt-BR')}</span>
+                            </div>
+                            <div style={{ fontSize: 13, marginTop: 4, whiteSpace: 'pre-wrap', color: 'var(--text-secondary)' }}>{c.content}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

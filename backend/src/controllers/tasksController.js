@@ -191,6 +191,9 @@ exports.delete = async (req, res) => {
     // Manual cascading deletion of associated activities
     await prisma.activity.deleteMany({ where: { taskId: req.params.id } });
     
+    // Manual cascading deletion of associated comments
+    await prisma.comment.deleteMany({ where: { taskId: req.params.id } });
+    
     await prisma.task.delete({ where: { id: req.params.id } });
     
     await recalcProgress(projectId);
@@ -199,3 +202,47 @@ exports.delete = async (req, res) => {
     res.status(500).json({ message: 'Erro interno' });
   }
 };
+
+// GET /api/tasks/:id/comments
+exports.getComments = async (req, res) => {
+  try {
+    const comments = await prisma.comment.findMany({
+      where: { taskId: req.params.id },
+      include: {
+        user: { select: { id: true, name: true, avatar: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(comments);
+  } catch (err) {
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
+
+// POST /api/tasks/:id/comments
+exports.addComment = async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content) return res.status(400).json({ message: 'Conteúdo do comentário é obrigatório' });
+
+    const task = await prisma.task.findUnique({ where: { id: req.params.id } });
+    if (!task) return res.status(404).json({ message: 'Tarefa não encontrada' });
+
+    const newComment = await prisma.comment.create({
+      data: {
+        content,
+        taskId: req.params.id,
+        userId: req.user.id
+      },
+      include: {
+        user: { select: { id: true, name: true, avatar: true } }
+      }
+    });
+
+    res.status(201).json(newComment);
+  } catch (err) {
+    console.error('Erro ao adicionar comentário:', err);
+    res.status(500).json({ message: 'Erro interno ao adicionar comentário' });
+  }
+};
+

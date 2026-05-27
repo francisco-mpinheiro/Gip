@@ -49,6 +49,8 @@ export const tasksAPI = {
   update: (id, data) => API.put(`/tasks/${id}`, data),
   updateStatus: (id, status) => API.patch(`/tasks/${id}/status`, { status }),
   delete: (id) => API.delete(`/tasks/${id}`),
+  getComments: (id) => API.get(`/tasks/${id}/comments`),
+  addComment: (id, content) => API.post(`/tasks/${id}/comments`, { content }),
 };
 
 export const dashboardAPI = {
