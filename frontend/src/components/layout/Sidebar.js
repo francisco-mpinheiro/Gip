@@ -9,7 +9,6 @@ const navItems = [
   { path: '/performance', icon: 'bi bi-graph-up', label: 'Desempenho' },
   { path: '/team', icon: 'bi bi-people', label: 'Equipe' },
   { path: '/users', icon: 'bi bi-shield-lock', label: 'Usuários', adminOnly: true },
-  { path: '/settings', icon: 'bi bi-gear', label: 'Configurações' },
 ];
 
 export default function Sidebar() {
@@ -49,13 +48,15 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="user-mini" onClick={() => navigate('/profile')}>
-          <div className="avatar sm">{user?.avatar}</div>
-          <div className="user-mini-info">
-            <div className="user-mini-name">{user?.name?.split(' ')[0]}</div>
-            <div className="user-mini-role">{ROLE_LABELS[user?.role]}</div>
-          </div>
-        </div>
+        
+        <button
+          className="btn btn-danger btn-sm"
+          onClick={logout}
+          title="Fazer logout"
+          style={{ width: '100%', marginTop: '8px', justifyContent: 'center' }}
+        >
+          🚪 Sair
+        </button>
       </div>
     </aside>
   );
