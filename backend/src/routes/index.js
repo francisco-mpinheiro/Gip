@@ -38,6 +38,8 @@ router.post('/tasks', authenticate, authorize(...MANAGER_ROLES), tasksCtrl.creat
 router.put('/tasks/:id', authenticate, tasksCtrl.update);
 router.patch('/tasks/:id/status', authenticate, tasksCtrl.updateStatus);
 router.delete('/tasks/:id', authenticate, authorize(...MANAGER_ROLES), tasksCtrl.delete);
+router.get('/tasks/:id/comments', authenticate, tasksCtrl.getComments);
+router.post('/tasks/:id/comments', authenticate, tasksCtrl.addComment);
 
 // ─── DASHBOARD & PERFORMANCE ─────────────────────────────────────────────────
 router.get('/dashboard', authenticate, dashboardCtrl.getDashboard);

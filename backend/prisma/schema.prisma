@@ -41,6 +41,7 @@ model User {
   memberProjects  Project[] @relation("ProjectMembers")
   tasks           Task[]
   activities      Activity[]
+  comments        Comment[]
 
   @@map("users")
 }
@@ -87,6 +88,7 @@ model Task {
   assignee    User?    @relation(fields: [assigneeId], references: [id])
   
   activities  Activity[]
+  comments    Comment[]
 
   @@map("tasks")
 }
@@ -108,4 +110,19 @@ model Activity {
   project     Project? @relation(fields: [projectId], references: [id])
 
   @@map("activities")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+
+  @@map("comments")
 }
