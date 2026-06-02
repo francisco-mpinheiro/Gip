@@ -95,7 +95,7 @@ export default function TeamPage() {
       {/* FILTER BAR */}
       <div className="filter-bar">
         <div className="filter-search">
-          <span className="filter-search-icon">🔍</span>
+          <span className="material-symbols-outlined filter-search-icon" style={{ fontSize: 18, left: 8 }}>search</span>
           <input placeholder="Buscar membros..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="filter-select" value={filterDept} onChange={e => setFilterDept(e.target.value)}>

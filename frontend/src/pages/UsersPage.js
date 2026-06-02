@@ -114,7 +114,7 @@ export default function UsersPage() {
       {/* FILTER */}
       <div className="filter-bar">
         <div className="filter-search">
-          <span className="filter-search-icon">🔍</span>
+          <span className="material-symbols-outlined filter-search-icon" style={{ fontSize: 18, left: 8 }}>search</span>
           <input placeholder="Buscar usuários..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="filter-select" value={filterRole} onChange={e => setFilterRole(e.target.value)}>
@@ -185,10 +185,14 @@ export default function UsersPage() {
                       </div>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn btn-ghost btn-sm btn-icon" onClick={() => openEdit(u)} title="Editar">✏</button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => openEdit(u)} title="Editar">
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                        </button>
                         {currentUser?.role === 'admin_platform' && u.id !== currentUser?.id && (
-                          <button className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--accent-red)' }} onClick={() => handleDelete(u.id)} title="Excluir">🗑</button>
+                          <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-red)' }} onClick={() => handleDelete(u.id)} title="Excluir">
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                          </button>
                         )}
                       </div>
                     </td>

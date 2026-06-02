@@ -67,48 +67,50 @@ export default function LoginPage() {
       <div style={css.left}>
         <div style={css.leftGlow} />
 
-        <div style={css.logo}>
-          <div style={css.logoBox}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-person-workspace"
-              viewBox="0 0 16 16"
-            >
-              <path d="M4 16s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-5.95a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
-              <path d="M2 1a2 2 0 0 0-2 2v9.5A1.5 1.5 0 0 0 1.5 14h.653a5.4 5.4 0 0 1 1.066-2H1V3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9h-2.219c.554.654.89 1.373 1.066 2h.653a1.5 1.5 0 0 0 1.5-1.5V3a2 2 0 0 0-2-2z" />
-            </svg>
-          </div>
-          <span style={css.logoText}>GIP</span>
-        </div>
-
-        <h1 style={css.headline}>
-          Transforme a<br />
-          <span style={{ color: "#3b82f6" }}>gestão</span> da
-          <br />
-          sua equipe
-        </h1>
-
-        <p style={css.desc}>
-          Centralize projetos, otimize processos e aumente a produtividade com
-          controle total, visibilidade e resultados mensuráveis.
-        </p>
-
-        <div style={css.features}>
-          {FEATURES.map((f) => (
-            <div key={f.title} style={css.feat}>
-              <div style={css.featIcon}>
-                <i className={f.icon}></i>
-              </div>
-
-              <div>
-                <div style={css.featTitle}>{f.title}</div>
-                <div style={css.featDesc}>{f.desc}</div>
-              </div>
+        <div style={css.leftContent}>
+          <div style={css.logo}>
+            <div style={css.logoBox}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-person-workspace"
+                viewBox="0 0 16 16"
+              >
+                <path d="M4 16s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-5.95a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
+                <path d="M2 1a2 2 0 0 0-2 2v9.5A1.5 1.5 0 0 0 1.5 14h.653a5.4 5.4 0 0 1 1.066-2H1V3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9h-2.219c.554.654.89 1.373 1.066 2h.653a1.5 1.5 0 0 0 1.5-1.5V3a2 2 0 0 0-2-2z" />
+              </svg>
             </div>
-          ))}
+            <span style={css.logoText}>GIP</span>
+          </div>
+
+          <h1 style={css.headline}>
+            Transforme a<br />
+            <span style={{ color: "#3b82f6" }}>gestão</span> da
+            <br />
+            sua equipe
+          </h1>
+
+          <p style={css.desc}>
+            Centralize projetos, otimize processos e aumente a produtividade com
+            controle total, visibilidade e resultados mensuráveis.
+          </p>
+
+          <div style={css.features}>
+            {FEATURES.map((f) => (
+              <div key={f.title} style={css.feat}>
+                <div style={css.featIcon}>
+                  <i className={f.icon}></i>
+                </div>
+
+                <div>
+                  <div style={css.featTitle}>{f.title}</div>
+                  <div style={css.featDesc}>{f.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -380,7 +382,8 @@ const css = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    padding: "48px 64px",
+    alignItems: "flex-start",
+    padding: "60px 8%",
     position: "relative",
     overflow: "hidden",
   },
@@ -392,13 +395,17 @@ const css = {
                  radial-gradient(ellipse at 85% 75%, rgba(139,92,246,0.09) 0%, transparent 50%),
                  radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.04) 0%, transparent 70%)`,
   },
+  leftContent: {
+    width: "100%",
+    maxWidth: 620,
+    position: "relative",
+    zIndex: 1,
+  },
   logo: {
     display: "flex",
     alignItems: "center",
     gap: 12,
     marginBottom: 44,
-    position: "relative",
-    zIndex: 1,
   },
   logoBox: {
     width: 46,
@@ -419,53 +426,47 @@ const css = {
   },
 
   headline: {
-    fontSize: "clamp(30px, 3.2vw, 50px)",
+    fontSize: "clamp(38px, 4vw, 58px)",
     fontWeight: 800,
-    lineHeight: 1.1,
+    lineHeight: 1.15,
     color: "#f1f5f9",
     letterSpacing: "-0.03em",
-    marginBottom: 18,
-    position: "relative",
-    zIndex: 1,
+    marginBottom: 24,
   },
   desc: {
-    fontSize: 15,
+    fontSize: 18,
     color: "#94a3b8",
-    lineHeight: 1.7,
-    marginBottom: 32,
-    maxWidth: 460,
-    position: "relative",
-    zIndex: 1,
+    lineHeight: 1.6,
+    marginBottom: 48,
+    maxWidth: 540,
   },
 
   features: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "10px 20px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: "32px 24px",
     marginBottom: 32,
-    position: "relative",
-    zIndex: 1,
   },
-  feat: { display: "flex", alignItems: "flex-start", gap: 10 },
+  feat: { display: "flex", alignItems: "flex-start", gap: 16 },
   featIcon: {
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
     flexShrink: 0,
     background: "rgba(255,255,255,0.05)",
     border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 8,
+    borderRadius: 12,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: 14,
+    fontSize: 18,
   },
   featTitle: {
-    fontSize: 12.5,
+    fontSize: 15,
     fontWeight: 700,
     color: "#e2e8f0",
-    marginBottom: 1,
+    marginBottom: 2,
   },
-  featDesc: { fontSize: 11, color: "#64748b", lineHeight: 1.4 },
+  featDesc: { fontSize: 13.5, color: "#64748b", lineHeight: 1.45 },
 
   stats: { display: "flex", gap: 32, position: "relative", zIndex: 1 },
   stat: {},
