@@ -50,12 +50,12 @@ export default function Sidebar() {
       <div className="sidebar-footer">
         
         <button
-          className="btn btn-danger btn-sm"
+          className="sidebar-logout-btn"
           onClick={logout}
           title="Fazer logout"
-          style={{ width: '100%', marginTop: '8px', justifyContent: 'center' }}
         >
-          🚪 Sair
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
+          <span>Sair</span>
         </button>
       </div>
     </aside>

@@ -181,15 +181,17 @@ export default function Topbar({ title }) {
                   className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
                   onClick={toggleTheme}
                   title="Tema escuro"
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
-                  🌙 Escuro
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>dark_mode</span> Escuro
                 </button>
                 <button
                   className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
                   onClick={toggleTheme}
                   title="Tema claro"
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
-                  ☀️ Claro
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>light_mode</span> Claro
                 </button>
               </div>
             </div>

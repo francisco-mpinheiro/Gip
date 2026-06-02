@@ -55,71 +55,132 @@
 
 /* ─── TEMA CLARO ──────────────────────────────────────────────────────────── */
 :root[data-theme="light"] {
-  --bg-primary:       #f8f9fb;
-  --bg-secondary:     #f0f2f7;
+  --bg-primary:       #f0f4f9;
+  --bg-secondary:     #e4eaf1;
   --bg-card:          #ffffff;
-  --bg-card-hover:    #f5f7fa;
-  --bg-sidebar:       #2d5a96;
+  --bg-card-hover:    #f8fafc;
+  --bg-sidebar:       #1e3a8a;
   --bg-input:         #ffffff;
-  --border:           #d1dce8;
-  --border-light:     #e5ecf4;
-  --accent-blue:      #3b82f6;
-  --accent-blue-hover:#2563eb;
-  --accent-blue-dim:  rgba(59,130,246,0.08);
+  --border:           #dbeafe;
+  --border-light:     #eff6ff;
+  --accent-blue:      #2563eb;
+  --accent-blue-hover:#1d4ed8;
+  --accent-blue-dim:  rgba(37, 99, 235, 0.08);
   --accent-green:     #16a34a;
   --accent-red:       #dc2626;
   --accent-amber:     #d97706;
   --accent-purple:    #9333ea;
-  --text-primary:     #1e293b;
-  --text-secondary:   #64748b;
+  --text-primary:     #0f172a;
+  --text-secondary:   #475569;
   --text-muted:       #94a3b8;
-  --shadow:           0 4px 24px rgba(15,23,42,0.08);
-  --shadow-sm:        0 2px 10px rgba(15,23,42,0.06);
+  --shadow:           0 4px 12px rgba(15, 23, 42, 0.05);
+  --shadow-sm:        0 1px 3px rgba(15, 23, 42, 0.05);
 }
 
 /* ─── ESTILOS ESPECÍFICOS DO TEMA CLARO ──────────────────────────────────── */
 :root[data-theme="light"] .sidebar {
-  background: #2d5a96;
-  border-right-color: rgba(59,130,246,0.15);
+  background: var(--bg-sidebar);
+  border-right-color: rgba(0, 0, 0, 0.05);
+}
+
+:root[data-theme="light"] .sidebar-logo {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="light"] .sidebar-logo-text strong {
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .sidebar-logo-text span {
+  color: #93c5fd;
 }
 
 :root[data-theme="light"] .sidebar-nav .nav-item {
-  color: rgba(255,255,255,0.8);
+  color: #bfdbfe;
 }
 
 :root[data-theme="light"] .sidebar-nav .nav-item:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 :root[data-theme="light"] .sidebar-nav .nav-item.active {
-  background: rgba(59,130,246,0.25);
-  color: white;
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: transparent;
 }
 
-:root[data-theme="light"] .sidebar-user-mini {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.9);
+:root[data-theme="light"] .sidebar-logout-btn {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .sidebar-logout-btn:hover {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff4d4d;
 }
 
 :root[data-theme="light"] .topbar {
-  background: #2d5a96;
-  border-bottom-color: rgba(59,130,246,0.15);
+  background: #ffffff;
+  border-bottom-color: var(--border);
 }
 
-:root[data-theme="light"] .topbar-icon-btn {
-  color: white;
+:root[data-theme="light"] .topbar-menu-btn {
+  background: #ffffff;
+  border-color: var(--border);
+  color: var(--text-secondary);
 }
 
+:root[data-theme="light"] .topbar-menu-btn:hover {
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
+  background: var(--bg-primary);
+}
+
+:root[data-theme="light"] .topbar-search input {
+  background: var(--bg-primary);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .topbar-search input:focus {
+  background: #ffffff;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-dim);
+}
+
+:root[data-theme="light"] .topbar-search-icon {
+  color: var(--text-muted);
+}
+
+:root[data-theme="light"] .topbar-icon-btn,
 :root[data-theme="light"] .topbar-user {
-  color: white;
+  background: #ffffff;
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .topbar-icon-btn:hover,
+:root[data-theme="light"] .topbar-user:hover {
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
+  background: var(--bg-primary);
+}
+
+:root[data-theme="light"] .topbar-user-name {
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .topbar-user-role {
+  color: var(--text-muted);
 }
 
 :root[data-theme="light"] th {
-  background: #f0f2f7;
+  background: #f8fafc;
 }
 
 :root[data-theme="light"] .kanban-col {
-  background: #f8f9fb;
+  background: var(--bg-primary);
 }
 
 :root[data-theme="light"] .badge-alta {
