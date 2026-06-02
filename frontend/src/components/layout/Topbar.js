@@ -42,9 +42,6 @@ export default function Topbar({ title }) {
 
   return (
     <header className="topbar">
-      <div className="topbar-search">
-        <input placeholder="Buscar..." />
-      </div>
 
       <div className="topbar-right">
         <button 

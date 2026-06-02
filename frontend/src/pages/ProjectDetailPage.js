@@ -214,10 +214,14 @@ export default function ProjectDetailPage() {
                           </span>
                         )}
                       </div>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '3px 6px', fontSize: 12 }} onClick={() => openEditTask(task)}>✏</button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => openEditTask(task)}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                        </button>
                         {canDo('create_task') && (
-                          <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '3px 6px', fontSize: 12, color: 'var(--accent-red)' }} onClick={() => handleDeleteTask(task.id)}>🗑</button>
+                          <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-red)' }} onClick={() => handleDeleteTask(task.id)}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                          </button>
                         )}
                       </div>
                     </div>

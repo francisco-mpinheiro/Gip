@@ -172,17 +172,21 @@ export default function ProjectsPage() {
                       <div className="avatar sm" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', fontSize: 10 }}>+{p.memberCount - 4}</div>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {p.endDate && (
                       <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
                         <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(p.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                       </span>
                     )}
                     {canDo('edit_project') && (
-                      <button className="btn btn-ghost btn-sm btn-icon" onClick={e => openEdit(p, e)} title="Editar">✏</button>
+                      <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={e => openEdit(p, e)} title="Editar">
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                      </button>
                     )}
                     {canDo('delete_project') && (
-                      <button className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--accent-red)' }} onClick={e => handleDelete(p.id, e)} title="Excluir">🗑</button>
+                      <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-red)' }} onClick={e => handleDelete(p.id, e)} title="Excluir">
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                      </button>
                     )}
                   </div>
                 </div>

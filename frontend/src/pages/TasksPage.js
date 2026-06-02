@@ -188,8 +188,8 @@ export default function TasksPage() {
           <option value="baixa">Baixa</option>
         </select>
         <button 
-          className={`btn btn-sm ${filterMine ? 'btn-primary' : 'btn-ghost'}`} 
-          style={{ padding: '6px 12px', border: filterMine ? 'none' : '1px solid var(--border)' }}
+          className={`btn ${filterMine ? 'btn-primary' : 'btn-ghost'}`} 
+          style={{ padding: '7px 16px', fontSize: '14px', borderRadius: '8px', border: filterMine ? '1px solid transparent' : '1px solid var(--border)' }}
           onClick={() => setFilterMine(!filterMine)}
           title="Mostrar apenas as tarefas atribuídas a mim"
         >
@@ -240,7 +240,9 @@ export default function TasksPage() {
                         </span>
                       )}
                     </div>
-                    <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '3px 6px' }} onClick={(e) => { e.stopPropagation(); openEdit(t); }}>✏</button>
+                    <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.stopPropagation(); openEdit(t); }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -308,10 +310,14 @@ export default function TasksPage() {
                         {t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : '—'}
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: 4 }}>
-                          <button className="btn btn-ghost btn-sm btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(t); }}>✏</button>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.stopPropagation(); openEdit(t); }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                          </button>
                           {canDo('create_task') && (
-                            <button className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--accent-red)' }} onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }}>🗑</button>
+                            <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-red)' }} onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                            </button>
                           )}
                         </div>
                       </td>
