@@ -19,7 +19,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Erro interno do servidor' });
 });
 
-seedDatabase().then(() => {
+seedDatabase().then(() => { // trigger restart
   app.listen(PORT, () => {
     console.log(`\n🚀 GIP API rodando em http://localhost:${PORT}`);
     console.log(`\n📋 Usuários de teste:`);

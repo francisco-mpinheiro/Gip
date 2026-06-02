@@ -42,6 +42,7 @@ model User {
   tasks           Task[]
   activities      Activity[]
   comments        Comment[]
+  notifications   Notification[]
 
   @@map("users")
 }
@@ -66,6 +67,7 @@ model Project {
   
   tasks       Task[]
   activities  Activity[]
+  notifications Notification[]
 
   @@map("projects")
 }
@@ -89,6 +91,7 @@ model Task {
   
   activities  Activity[]
   comments    Comment[]
+  notifications Notification[]
 
   @@map("tasks")
 }
@@ -125,4 +128,22 @@ model Comment {
   task      Task     @relation(fields: [taskId], references: [id])
 
   @@map("comments")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  taskId    String?
+  task      Task?    @relation(fields: [taskId], references: [id])
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  @@map("notifications")
 }

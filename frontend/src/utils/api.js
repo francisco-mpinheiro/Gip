@@ -58,4 +58,10 @@ export const dashboardAPI = {
   performance: () => API.get('/performance'),
 };
 
+export const notificationsAPI = {
+  getAll: () => API.get('/notifications'),
+  markAsRead: (id) => API.patch(`/notifications/${id}/read`),
+  markAllAsRead: () => API.patch('/notifications/read-all'),
+};
+
 export default API;

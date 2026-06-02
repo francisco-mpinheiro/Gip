@@ -6,6 +6,7 @@ const usersCtrl = require('../controllers/usersController');
 const projectsCtrl = require('../controllers/projectsController');
 const tasksCtrl = require('../controllers/tasksController');
 const dashboardCtrl = require('../controllers/dashboardController');
+const notificationsCtrl = require('../controllers/notificationsController');
 const { ROLES } = require('../config/database');
 
 const ADMIN_ROLES = [ROLES.ADMIN_PLATFORM, ROLES.ADMIN_COMPANY];
@@ -40,6 +41,11 @@ router.patch('/tasks/:id/status', authenticate, tasksCtrl.updateStatus);
 router.delete('/tasks/:id', authenticate, authorize(...MANAGER_ROLES), tasksCtrl.delete);
 router.get('/tasks/:id/comments', authenticate, tasksCtrl.getComments);
 router.post('/tasks/:id/comments', authenticate, tasksCtrl.addComment);
+
+// ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
+router.get('/notifications', authenticate, notificationsCtrl.getAll);
+router.patch('/notifications/read-all', authenticate, notificationsCtrl.markAllAsRead);
+router.patch('/notifications/:id/read', authenticate, notificationsCtrl.markAsRead);
 
 // ─── DASHBOARD & PERFORMANCE ─────────────────────────────────────────────────
 router.get('/dashboard', authenticate, dashboardCtrl.getDashboard);

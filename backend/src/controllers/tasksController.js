@@ -100,6 +100,17 @@ exports.create = async (req, res) => {
       }
     });
 
+    if (assigneeId) {
+      await prisma.notification.create({
+        data: {
+          content: `Uma nova tarefa foi delegada a você: "${title}"`,
+          userId: assigneeId,
+          taskId: newTask.id,
+          projectId: projectId
+        }
+      });
+    }
+
     await recalcProgress(projectId);
 
     res.status(201).json(newTask);
@@ -138,6 +149,17 @@ exports.update = async (req, res) => {
         }
       }
     });
+
+    if (data.assigneeId && data.assigneeId !== task.assigneeId) {
+      await prisma.notification.create({
+        data: {
+          content: `Uma tarefa foi delegada a você: "${updatedTask.title}"`,
+          userId: data.assigneeId,
+          taskId: updatedTask.id,
+          projectId: updatedTask.projectId
+        }
+      });
+    }
 
     await recalcProgress(task.projectId);
 
