@@ -32,6 +32,8 @@ router.post('/projects', authenticate, authorize(...MANAGER_ROLES), projectsCtrl
 router.put('/projects/:id', authenticate, projectsCtrl.update);
 router.delete('/projects/:id', authenticate, authorize(...ADMIN_ROLES), projectsCtrl.delete);
 
+const upload = require('../middleware/upload');
+
 // ─── TASKS ───────────────────────────────────────────────────────────────────
 router.get('/tasks', authenticate, tasksCtrl.getAll);
 router.get('/tasks/:id', authenticate, tasksCtrl.getById);
@@ -41,6 +43,8 @@ router.patch('/tasks/:id/status', authenticate, tasksCtrl.updateStatus);
 router.delete('/tasks/:id', authenticate, authorize(...MANAGER_ROLES), tasksCtrl.delete);
 router.get('/tasks/:id/comments', authenticate, tasksCtrl.getComments);
 router.post('/tasks/:id/comments', authenticate, tasksCtrl.addComment);
+router.post('/tasks/:id/attachments', authenticate, upload.single('file'), tasksCtrl.addAttachment);
+router.delete('/tasks/:id/attachments/:attachmentId', authenticate, tasksCtrl.deleteAttachment);
 
 // ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
 router.get('/notifications', authenticate, notificationsCtrl.getAll);

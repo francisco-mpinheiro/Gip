@@ -7,8 +7,13 @@ const routes = require('./routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const path = require('path');
+
 app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json());
+
+// Serve static files from uploads folder
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use('/api', routes);
 

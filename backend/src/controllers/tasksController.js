@@ -45,7 +45,8 @@ exports.getAll = async (req, res) => {
       where,
       include: {
         assignee: { select: { id: true, name: true, avatar: true } },
-        project: { select: { id: true, name: true } }
+        project: { select: { id: true, name: true } },
+        attachments: true
       }
     });
 
@@ -63,7 +64,10 @@ exports.getAll = async (req, res) => {
 // GET /api/tasks/:id
 exports.getById = async (req, res) => {
   try {
-    const task = await prisma.task.findUnique({ where: { id: req.params.id } });
+    const task = await prisma.task.findUnique({
+      where: { id: req.params.id },
+      include: { attachments: true }
+    });
     if (!task) return res.status(404).json({ message: 'Tarefa não encontrada' });
     res.json(task);
   } catch (err) {
@@ -268,3 +272,49 @@ exports.addComment = async (req, res) => {
   }
 };
 
+// POST /api/tasks/:id/attachments
+exports.addAttachment = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'Nenhum arquivo enviado' });
+
+    const task = await prisma.task.findUnique({ where: { id: req.params.id } });
+    if (!task) return res.status(404).json({ message: 'Tarefa não encontrada' });
+
+    const newAttachment = await prisma.taskAttachment.create({
+      data: {
+        fileName: req.file.originalname,
+        fileUrl: `/uploads/${req.file.filename}`,
+        taskId: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    res.status(201).json(newAttachment);
+  } catch (err) {
+    console.error('Erro ao adicionar anexo:', err);
+    res.status(500).json({ message: 'Erro interno ao adicionar anexo' });
+  }
+};
+
+// DELETE /api/tasks/:id/attachments/:attachmentId
+exports.deleteAttachment = async (req, res) => {
+  try {
+    const attachment = await prisma.taskAttachment.findUnique({ where: { id: req.params.attachmentId } });
+    if (!attachment) return res.status(404).json({ message: 'Anexo não encontrado' });
+
+    await prisma.taskAttachment.delete({ where: { id: req.params.attachmentId } });
+
+    // Excluir arquivo físico
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(__dirname, '../../', attachment.fileUrl);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    res.json({ message: 'Anexo removido com sucesso' });
+  } catch (err) {
+    console.error('Erro ao remover anexo:', err);
+    res.status(500).json({ message: 'Erro interno ao remover anexo' });
+  }
+};

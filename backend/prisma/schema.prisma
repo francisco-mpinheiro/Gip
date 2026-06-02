@@ -43,6 +43,7 @@ model User {
   activities      Activity[]
   comments        Comment[]
   notifications   Notification[]
+  attachments     TaskAttachment[]
 
   @@map("users")
 }
@@ -92,6 +93,7 @@ model Task {
   activities  Activity[]
   comments    Comment[]
   notifications Notification[]
+  attachments   TaskAttachment[]
 
   @@map("tasks")
 }
@@ -146,4 +148,19 @@ model Notification {
   project   Project? @relation(fields: [projectId], references: [id])
 
   @@map("notifications")
+}
+
+model TaskAttachment {
+  id        String   @id @default(uuid())
+  fileName  String
+  fileUrl   String
+  createdAt DateTime @default(now())
+
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("task_attachments")
 }

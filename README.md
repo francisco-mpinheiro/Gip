@@ -4,39 +4,75 @@ Plataforma completa de gestão de projetos e equipes com RBAC, Kanban e dashboar
 
 ---
 
-## 🚀 Como Rodar
+## 🚀 Como Rodar o Ambiente Local
+
+Siga os passos abaixo para rodar o backend, frontend e o banco de dados da aplicação na sua máquina.
 
 ### Pré-requisitos
-- Node.js 18+
-- npm ou yarn
+- **Node.js** (versão 18 ou superior)
+- **npm** ou **yarn**
+- **Docker** e **Docker Compose** (para rodar o PostgreSQL)
 
-### 1. Banco de Dados e Backend (API)
+---
 
-O projeto utiliza Node.js com PostgreSQL e Prisma ORM.
+### Passo 1: Subir o Banco de Dados (PostgreSQL via Docker)
 
-**Subindo o Banco de Dados (via Docker):**
-```bash
-cd backend/infra
-docker compose up -d
-```
+O projeto utiliza o PostgreSQL como banco de dados principal. A configuração já está pronta usando o Docker Compose.
 
-**Rodando a API:**
-```bash
-cd backend
-npm install
-npx prisma db push   # Cria as tabelas no banco de dados
-npm run dev          # Inicia o servidor e popula o banco (seed)
-# API rodando em http://localhost:5000
-```
+1. Navegue até a pasta de infraestrutura do backend:
+   ```bash
+   cd backend/infra
+   ```
+2. Inicie o container do banco de dados em background:
+   ```bash
+   docker compose up -d
+   ```
+   *(O banco estará rodando na porta `5432`)*
 
-### 2. Frontend (React)
+---
 
-```bash
-cd frontend
-npm install
-npm start
-# App rodando em http://localhost:3000
-```
+### Passo 2: Configurar e Rodar o Backend (API)
+
+O backend é construído em Node.js com Express e utiliza o Prisma ORM para gerenciar o banco de dados.
+
+1. Acesse o diretório do backend:
+   ```bash
+   cd backend
+   ```
+2. Instale as dependências do projeto:
+   ```bash
+   npm install
+   ```
+3. Crie e aplique as tabelas no banco de dados com o Prisma:
+   ```bash
+   npx prisma generate   # Gera o client do Prisma
+   npx prisma db push    # Sincroniza o schema com o banco de dados
+   ```
+4. Inicie o servidor:
+   ```bash
+   npm run dev
+   ```
+   *(A API estará rodando em `http://localhost:5000`. O script `dev` também se encarrega de popular o banco automaticamente executando o arquivo de seed, se necessário).*
+
+---
+
+### Passo 3: Configurar e Rodar o Frontend (React)
+
+O frontend é uma SPA (Single Page Application) desenvolvida em React.
+
+1. Abra uma nova aba no terminal e acesse a pasta do frontend:
+   ```bash
+   cd frontend
+   ```
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+3. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm start
+   ```
+   *(A aplicação estará disponível em `http://localhost:3000`)*
 
 ---
 

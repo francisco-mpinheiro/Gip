@@ -37,6 +37,7 @@ export default function TasksPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -89,6 +90,38 @@ export default function TasksPage() {
       loadComments(viewingTask.id);
     } catch (err) {
       alert(err.response?.data?.message || 'Erro ao adicionar comentário');
+    }
+  };
+
+  const handleUploadAttachment = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !viewingTask) return;
+    setUploading(true);
+    try {
+      const res = await tasksAPI.uploadAttachment(viewingTask.id, file);
+      setViewingTask(t => ({
+        ...t,
+        attachments: [...(t.attachments || []), res.data]
+      }));
+      load(); // refresh tasks list
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erro ao fazer upload do anexo');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!window.confirm('Tem certeza que deseja excluir este anexo?')) return;
+    try {
+      await tasksAPI.deleteAttachment(viewingTask.id, attachmentId);
+      setViewingTask(t => ({
+        ...t,
+        attachments: (t.attachments || []).filter(a => a.id !== attachmentId)
+      }));
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erro ao excluir anexo');
     }
   };
 
@@ -460,6 +493,40 @@ export default function TasksPage() {
                 </div>
               </div>
 
+              {/* ANEXOS */}
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <h4 style={{ fontSize: 16, display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
+                    <span className="material-symbols-outlined">attach_file</span>
+                    Anexos
+                  </h4>
+                  <label className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload</span>
+                    {uploading ? 'Enviando...' : 'Anexar Arquivo'}
+                    <input type="file" style={{ display: 'none' }} onChange={handleUploadAttachment} disabled={uploading} />
+                  </label>
+                </div>
+                
+                {viewingTask.attachments && viewingTask.attachments.length > 0 ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                    {viewingTask.attachments.map(a => (
+                      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg-input)', padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border-light)' }}>
+                        <a href={`http://localhost:5000${a.fileUrl}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--accent-blue)' }}>description</span>
+                          {a.fileName}
+                        </a>
+                        <button className="btn-icon" onClick={() => handleDeleteAttachment(a.id)} style={{ background: 'none', border: 'none', color: 'var(--accent-red)', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title="Excluir anexo">
+                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Nenhum anexo adicionado.</div>
+                )}
+              </div>
+
+              {/* COMENTARIOS */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20 }}>
                 <h4 style={{ fontSize: 16, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className="material-symbols-outlined">forum</span>
