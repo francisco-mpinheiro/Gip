@@ -115,8 +115,8 @@ export default function ProjectsPage() {
           />
         </div>
         <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
-          <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Todos os status</option>
-          {STATUS_OPTS.map(s => <option key={s.value} value={s.value} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{s.label}</option>)}
+          <option value="">Todos os status</option>
+          {STATUS_OPTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </div>
 
@@ -175,7 +175,7 @@ export default function ProjectsPage() {
                   <div style={{ display: 'flex', gap: 6 }}>
                     {p.endDate && (
                       <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                        🕐 {new Date(p.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                        <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(p.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                       </span>
                     )}
                     {canDo('edit_project') && (
@@ -214,13 +214,13 @@ export default function ProjectsPage() {
                   <div className="form-group">
                     <label className="form-label">Status</label>
                     <select className="form-select" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
-                      {STATUS_OPTS.map(s => <option key={s.value} value={s.value} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{s.label}</option>)}
+                      {STATUS_OPTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                     </select>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Prioridade</label>
                     <select className="form-select" value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
-                      {PRIORITY_OPTS.map(s => <option key={s.value} value={s.value} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{s.label} </option>)}
+                      {PRIORITY_OPTS.map(s => <option key={s.value} value={s.value}>{s.label} </option>)}
                     </select>
                   </div>
                 </div>
@@ -237,8 +237,8 @@ export default function ProjectsPage() {
                 <div className="form-group">
                   <label className="form-label">Gerente do Projeto</label>
                   <select className="form-select" value={form.managerId} onChange={e => setForm(f => ({ ...f, managerId: e.target.value }))} style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
-                    <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Selecionar...</option>
-                    {users.filter(u => u.active).map(u => <option key={u.id} value={u.id} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{u.name}</option>)}
+                    <option value="">Selecionar...</option>
+                    {users.filter(u => u.active).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                   </select>
                 </div>
                 <div className="form-group">

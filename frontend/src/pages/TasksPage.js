@@ -169,14 +169,14 @@ export default function TasksPage() {
           <input placeholder="Buscar tarefas..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Todos status</option>
-          {COLUMNS.map(c => <option key={c.key} value={c.key} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{c.label}</option>)}
+          <option value="">Todos status</option>
+          {COLUMNS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
         </select>
         <select className="filter-select" value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
-          <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Todas prioridades</option>
-          <option value="alta" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Alta</option>
-          <option value="media" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Média</option>
-          <option value="baixa" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Baixa</option>
+          <option value="">Todas prioridades</option>
+          <option value="alta">Alta</option>
+          <option value="media">Média</option>
+          <option value="baixa">Baixa</option>
         </select>
         <button 
           className={`btn btn-sm ${filterMine ? 'btn-primary' : 'btn-ghost'}`} 
@@ -226,7 +226,7 @@ export default function TasksPage() {
                       {t.assignee && <div className="avatar sm" title={t.assignee.name}>{t.assignee.avatar}</div>}
                       {t.dueDate && (
                         <span className={`kanban-card-date ${t.overdue ? 'overdue' : ''}`}>
-                          🕐 {new Date(t.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(t.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                         </span>
                       )}
                     </div>
@@ -290,7 +290,7 @@ export default function TasksPage() {
                           value={t.status}
                           onChange={e => handleStatusChange(t.id, e.target.value)}
                         >
-                          {COLUMNS.map(c => <option key={c.key} value={c.key} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{c.label}</option>)}
+                          {COLUMNS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
                         </select>
                       </td>
                       <td style={{ fontSize: 12.5, color: t.overdue ? 'var(--accent-red)' : 'var(--text-secondary)' }}>
@@ -334,24 +334,24 @@ export default function TasksPage() {
                 <div className="form-group">
                   <label className="form-label">Projeto *</label>
                   <select className="form-select" value={form.projectId} onChange={e => setForm(f => ({ ...f, projectId: e.target.value, assigneeId: '' }))} required>
-                    <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Selecionar projeto...</option>
-                    {projects.map(p => <option key={p.id} value={p.id} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{p.name}</option>)}
+                    <option value="">Selecionar projeto...</option>
+                    {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">Responsável</label>
                     <select className="form-select" value={form.assigneeId} onChange={e => setForm(f => ({ ...f, assigneeId: e.target.value }))}>
-                      <option value="" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Sem responsável</option>
-                      {assignableUsers.filter(u => u.active).map(u => <option key={u.id} value={u.id} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{u.name}</option>)}
+                      <option value="">Sem responsável</option>
+                      {assignableUsers.filter(u => u.active).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                     </select>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Prioridade</label>
                     <select className="form-select" value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}>
-                      <option value="baixa" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Baixa</option>
-                      <option value="media" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Média</option>
-                      <option value="alta" style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>Alta</option>
+                      <option value="baixa">Baixa</option>
+                      <option value="media">Média</option>
+                      <option value="alta">Alta</option>
                     </select>
                   </div>
                 </div>
@@ -359,7 +359,7 @@ export default function TasksPage() {
                   <div className="form-group">
                     <label className="form-label">Status</label>
                     <select className="form-select" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-                      {COLUMNS.map(c => <option key={c.key} value={c.key} style={{ backgroundColor: '#101e34', color: '#94afd4', fontWeight: 500 }}>{c.label}</option>)}
+                      {COLUMNS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
                     </select>
                   </div>
                 )}

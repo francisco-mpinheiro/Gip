@@ -128,11 +128,11 @@ export default function ProjectDetailPage() {
                 <div className="progress-bar-fill progress-blue" style={{ width: `${project.progress}%` }} />
               </div>
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>📋 {project.tasks?.length || 0} tarefas</span>
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>👥 {members.length} membros</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>assignment</span> {project.tasks?.length || 0} tarefas</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>group</span> {members.length} membros</span>
                 {project.endDate && (
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    🕐 {new Date(project.endDate).toLocaleDateString('pt-BR')}
+                    <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(project.endDate).toLocaleDateString('pt-BR')}
                   </span>
                 )}
               </div>
@@ -210,7 +210,7 @@ export default function ProjectDetailPage() {
                         )}
                         {task.dueDate && (
                           <span className={`kanban-card-date ${overdue ? 'overdue' : ''}`}>
-                            🕐 {new Date(task.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(task.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                           </span>
                         )}
                       </div>

@@ -116,7 +116,7 @@ export default function PerformancePage() {
               color: "#60a5fa",
             }}
           >
-            {isEmployee ? "👤" : "👥"} {result?.scope}
+            <span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: 'middle', marginRight: 4 }}>{isEmployee ? 'person' : 'group'}</span> {result?.scope}
           </div>
         </div>
       </div>
@@ -536,7 +536,7 @@ function MyPerformanceCard({ data }) {
     return (
       <div className="card">
         <div className="empty-state">
-          <div className="empty-state-icon">📋</div>
+          <div className="empty-state-icon"><span className="material-symbols-outlined" style={{ fontSize: 'inherit' }}>assignment</span></div>
           <p>Nenhuma tarefa atribuída a você ainda.</p>
         </div>
       </div>

@@ -113,10 +113,10 @@ export default function DashboardPage() {
                 <span className="project-meta-item">
                   <span className={`badge ${STATUS_CLASS[p.status]}`}>{STATUS_LABEL[p.status] || p.status}</span>
                 </span>
-                <span className="project-meta-item">👥 {p.memberCount}</span>
+                <span className="project-meta-item"><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>group</span> {p.memberCount}</span>
                 {p.endDate && (
                   <span className="project-meta-item">
-                    🕐 {new Date(p.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(p.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </span>
                 )}
               </div>

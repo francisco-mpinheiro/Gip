@@ -66,7 +66,7 @@ export default function Topbar({ title }) {
           }}
           title="Configurações"
         >
-          ⚙️
+          <span className="material-symbols-outlined">settings</span>
         </button>
         <button
           className="topbar-user"
@@ -104,7 +104,19 @@ export default function Topbar({ title }) {
                 notifications.map(notif => (
                   <div 
                     key={notif.id} 
-                    onClick={() => handleMarkAsRead(notif.id)}
+                    onClick={async () => {
+                      if (!notif.isRead) {
+                        await handleMarkAsRead(notif.id);
+                      }
+                      setShowNotif(false);
+                      const projId = notif.projectId || notif.project?.id;
+                      const taskId = notif.taskId || notif.task?.id;
+                      if (projId) {
+                        navigate(`/projects/${projId}`);
+                      } else if (taskId) {
+                        navigate('/tasks');
+                      }
+                    }}
                     style={{ 
                       padding: '10px', 
                       background: notif.isRead ? 'transparent' : 'var(--bg-card)', 
@@ -112,8 +124,11 @@ export default function Topbar({ title }) {
                       width: '100%', 
                       cursor: 'pointer',
                       borderLeft: notif.isRead ? '3px solid transparent' : '3px solid var(--primary)',
-                      opacity: notif.isRead ? 0.7 : 1
+                      opacity: notif.isRead ? 0.7 : 1,
+                      transition: 'background 0.2s'
                     }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = notif.isRead ? 'transparent' : 'var(--bg-card)'; }}
                   >
                     <div style={{ fontSize: '13px', marginBottom: '4px' }}>{notif.content}</div>
                     <div style={{ fontSize: '11px', color: '#888' }}>{new Date(notif.createdAt).toLocaleString()}</div>
