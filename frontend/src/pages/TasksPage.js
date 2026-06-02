@@ -25,6 +25,8 @@ export default function TasksPage() {
   const [view, setView] = useState('list');
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [detailsModal, setDetailsModal] = useState(false);
+  const [viewingTask, setViewingTask] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
@@ -57,7 +59,16 @@ export default function TasksPage() {
     }
   };
 
-  const openCreate = () => { setEditing(null); setForm(emptyForm); setModal(true); setComments([]); setNewComment(''); };
+  const openCreate = () => { setEditing(null); setForm(emptyForm); setModal(true); };
+  
+  const openDetails = (t) => {
+    setViewingTask(t);
+    setDetailsModal(true);
+    setComments([]);
+    setNewComment('');
+    loadComments(t.id);
+  };
+
   const openEdit = (t) => {
     setEditing(t);
     setForm({
@@ -66,18 +77,16 @@ export default function TasksPage() {
       status: t.status, priority: t.priority,
       dueDate: t.dueDate ? t.dueDate.slice(0, 10) : '',
     });
-    setComments([]);
-    setNewComment('');
     setModal(true);
-    loadComments(t.id);
+    setDetailsModal(false);
   };
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !viewingTask) return;
     try {
-      await tasksAPI.addComment(editing.id, newComment);
+      await tasksAPI.addComment(viewingTask.id, newComment);
       setNewComment('');
-      loadComments(editing.id);
+      loadComments(viewingTask.id);
     } catch (err) {
       alert(err.response?.data?.message || 'Erro ao adicionar comentário');
     }
@@ -213,7 +222,8 @@ export default function TasksPage() {
                   className="kanban-card"
                   draggable
                   onDragStart={() => setDragging(t)}
-                  style={{ borderLeft: t.overdue ? '3px solid var(--accent-red)' : '3px solid transparent' }}
+                  onClick={() => openDetails(t)}
+                  style={{ borderLeft: t.overdue ? '3px solid var(--accent-red)' : '3px solid transparent', cursor: 'pointer' }}
                 >
                   <div className="kanban-card-title">{t.title}</div>
                   <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
@@ -230,7 +240,7 @@ export default function TasksPage() {
                         </span>
                       )}
                     </div>
-                    <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '3px 6px' }} onClick={() => openEdit(t)}>✏</button>
+                    <button className="btn btn-ghost btn-sm btn-icon" style={{ padding: '3px 6px' }} onClick={(e) => { e.stopPropagation(); openEdit(t); }}>✏</button>
                   </div>
                 </div>
               ))}
@@ -261,7 +271,7 @@ export default function TasksPage() {
                 </thead>
                 <tbody>
                   {filtered.map(t => (
-                    <tr key={t.id}>
+                    <tr key={t.id} onClick={() => openDetails(t)} style={{ cursor: 'pointer' }}>
                       <td>
                         <div style={{ fontWeight: 600, fontSize: 13.5 }}>{t.title}</div>
                         {t.overdue && <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>⚠ Atrasada</span>}
@@ -270,7 +280,7 @@ export default function TasksPage() {
                         {t.project ? (
                           <span
                             style={{ color: 'var(--accent-blue)', cursor: 'pointer', fontSize: 12.5 }}
-                            onClick={() => navigate(`/projects/${t.projectId}`)}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/projects/${t.projectId}`); }}
                           >{t.project.name}</span>
                         ) : '—'}
                       </td>
@@ -288,6 +298,7 @@ export default function TasksPage() {
                           className="filter-select"
                           style={{ padding: '4px 8px', fontSize: 11.5 }}
                           value={t.status}
+                          onClick={e => e.stopPropagation()}
                           onChange={e => handleStatusChange(t.id, e.target.value)}
                         >
                           {COLUMNS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
@@ -298,9 +309,9 @@ export default function TasksPage() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 4 }}>
-                          <button className="btn btn-ghost btn-sm btn-icon" onClick={() => openEdit(t)}>✏</button>
+                          <button className="btn btn-ghost btn-sm btn-icon" onClick={(e) => { e.stopPropagation(); openEdit(t); }}>✏</button>
                           {canDo('create_task') && (
-                            <button className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--accent-red)' }} onClick={() => handleDelete(t.id)}>🗑</button>
+                            <button className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--accent-red)' }} onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }}>🗑</button>
                           )}
                         </div>
                       </td>
@@ -373,46 +384,121 @@ export default function TasksPage() {
                 </div>
               </form>
 
-              {editing && (
-                <div style={{ marginTop: 24, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-                  <h4 style={{ fontSize: 16, marginBottom: 12 }}>Comentários</h4>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                    <input 
-                      className="form-input" 
-                      placeholder="Adicione um comentário..." 
-                      value={newComment} 
-                      onChange={e => setNewComment(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddComment();
-                        }
-                      }}
-                    />
-                    <button type="button" className="btn btn-primary" onClick={handleAddComment}>Enviar</button>
-                  </div>
-                  {loadingComments ? (
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Carregando...</div>
-                  ) : comments.length === 0 ? (
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Nenhum comentário ainda.</div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 200, overflowY: 'auto', paddingRight: 4 }}>
-                      {comments.map(c => (
-                        <div key={c.id} style={{ display: 'flex', gap: 10, background: 'var(--bg-input)', padding: 10, borderRadius: 8 }}>
-                          <div className="avatar sm" title={c.user?.name}>{c.user?.avatar || c.user?.name[0]}</div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: 13, fontWeight: 600 }}>{c.user?.name}</span>
-                              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(c.createdAt).toLocaleString('pt-BR')}</span>
-                            </div>
-                            <div style={{ fontSize: 13, marginTop: 4, whiteSpace: 'pre-wrap', color: 'var(--text-secondary)' }}>{c.content}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DETAILS MODAL */}
+      {detailsModal && viewingTask && (
+        <div className="modal-overlay" onClick={() => setDetailsModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 600 }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className="material-symbols-outlined" style={{ color: 'var(--text-muted)' }}>task_alt</span>
+                {viewingTask.title}
+              </h3>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="modal-close" onClick={() => setDetailsModal(false)}>✕</button>
+              </div>
+            </div>
+            
+            <div className="modal-body">
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>Projeto</div>
+                <div style={{ display: 'inline-block', background: 'var(--bg-input)', padding: '4px 8px', borderRadius: 6, fontSize: 13, fontWeight: 500 }}>
+                  {viewingTask.project ? viewingTask.project.name : '—'}
                 </div>
-              )}
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>Descrição</div>
+                {viewingTask.description ? (
+                  <div style={{ fontSize: 14, whiteSpace: 'pre-wrap', lineHeight: 1.5, color: 'var(--text-primary)' }}>
+                    {viewingTask.description}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    Nenhuma descrição fornecida.
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24, padding: 16, background: 'var(--bg-card)', borderRadius: 8, border: '1px solid var(--border-light)' }}>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Responsável</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {viewingTask.assignee ? (
+                      <>
+                        <div className="avatar sm">{viewingTask.assignee.avatar}</div>
+                        <span style={{ fontSize: 13.5, fontWeight: 500 }}>{viewingTask.assignee.name}</span>
+                      </>
+                    ) : (
+                      <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Não atribuído</span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Status</div>
+                  <span className={`badge ${STATUS_CLASS[viewingTask.status]}`}>{STATUS_LABEL[viewingTask.status]}</span>
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Prioridade</div>
+                  <span className={`badge ${PRIORITY_CLASS[viewingTask.priority]}`}>{viewingTask.priority}</span>
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Prazo</div>
+                  <div style={{ fontSize: 13.5, color: viewingTask.overdue ? 'var(--accent-red)' : 'var(--text-primary)', fontWeight: viewingTask.overdue ? 600 : 400 }}>
+                    {viewingTask.dueDate ? new Date(viewingTask.dueDate).toLocaleDateString('pt-BR') : 'Sem prazo'}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20 }}>
+                <h4 style={{ fontSize: 16, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="material-symbols-outlined">forum</span>
+                  Comentários
+                </h4>
+                
+                <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                  <input 
+                    className="form-input" 
+                    placeholder="Adicione um comentário..." 
+                    value={newComment} 
+                    onChange={e => setNewComment(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddComment();
+                      }
+                    }}
+                  />
+                  <button type="button" className="btn btn-primary" onClick={handleAddComment}>Enviar</button>
+                </div>
+
+                {loadingComments ? (
+                  <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>Carregando comentários...</div>
+                ) : comments.length === 0 ? (
+                  <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, background: 'var(--bg-card)', borderRadius: 8 }}>
+                    Nenhum comentário ainda. Seja o primeiro a comentar!
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxHeight: 300, overflowY: 'auto', paddingRight: 4 }}>
+                    {comments.map(c => (
+                      <div key={c.id} style={{ display: 'flex', gap: 12 }}>
+                        <div className="avatar sm" title={c.user?.name}>{c.user?.avatar || c.user?.name[0]}</div>
+                        <div style={{ flex: 1, background: 'var(--bg-input)', padding: '12px 16px', borderRadius: '0 12px 12px 12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                            <span style={{ fontSize: 13, fontWeight: 600 }}>{c.user?.name}</span>
+                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(c.createdAt).toLocaleString('pt-BR')}</span>
+                          </div>
+                          <div style={{ fontSize: 13.5, whiteSpace: 'pre-wrap', color: 'var(--text-primary)', lineHeight: 1.4 }}>{c.content}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
