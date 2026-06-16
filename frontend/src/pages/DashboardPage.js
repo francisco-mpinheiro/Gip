@@ -26,6 +26,23 @@ function progressColor(pct) {
   return 'progress-amber';
 }
 
+function getDateStyle(dateStr) {
+  if (!dateStr) return {};
+  const d = new Date(dateStr);
+  const today = new Date();
+  const taskDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  
+  if (taskDay <= todayDay) return { color: 'var(--accent-red)', fontWeight: 500 };
+  
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowDay = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate()).getTime();
+  if (taskDay === tomorrowDay) return { color: 'var(--accent-amber)', fontWeight: 500 };
+  
+  return { color: 'var(--text-secondary)' };
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -156,7 +173,7 @@ export default function DashboardPage() {
       {/* ACTIVITY CHART + RECENT ACTIVITY */}
       <div className="grid-2">
         <div className="card" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-          <div className="card-header" style={{ position: 'sticky', top: 0, backgroundColor: 'inherit', zIndex: 1, paddingBottom: '10px' }}>
+          <div className="card-header" style={{ position: 'sticky', top: '-20px', backgroundColor: 'var(--bg-card)', zIndex: 10, padding: '20px 0 15px 0', margin: '-20px 0 0 0', borderBottom: '1px solid var(--border-light)' }}>
             <span className="card-title">Atividades da Semana</span>
           </div>
           <div className="tasks-this-week-list" style={{ marginTop: '20px' }}>
@@ -170,23 +187,34 @@ export default function DashboardPage() {
                 <div className={`task-checkbox ${t.status === 'concluido' ? 'checked' : ''}`} />
                 <div className="task-content">
                   <div className={`task-title ${t.status === 'concluido' ? 'done' : ''}`}>{t.title}</div>
-                  <div className="task-meta">
-                    {t.project && <span className="task-project">{t.project.name}</span>}
-                    <span className="task-date">
-                      Prazo: {formatDateLocal(t.dueDate, { day: '2-digit', month: 'short', year: 'numeric' })}
+                  <div className="task-meta" style={{ gap: '12px', marginTop: '6px' }}>
+                    {t.project && (
+                      <span className="task-project" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'var(--accent-blue)', fontWeight: 500, fontSize: '12px', backgroundColor: 'var(--accent-blue-dim)', padding: '2px 6px', borderRadius: '4px' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>folder</span>
+                        {t.project.name}
+                      </span>
+                    )}
+                    <span className="task-date" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '12.5px', ...getDateStyle(t.dueDate) }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>event</span>
+                      {formatDateLocal(t.dueDate, { day: '2-digit', month: 'short' })}
                     </span>
                   </div>
                 </div>
-                <span className={`badge ${STATUS_CLASS[t.status]}`} style={{ fontSize: 10.5, flexShrink: 0 }}>
-                  {STATUS_LABEL[t.status] || t.status}
-                </span>
+                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                  <span className={`badge ${PRIORITY_CLASS[t.priority] || 'badge-a_fazer'}`} style={{ fontSize: 10.5, textTransform: 'capitalize' }}>
+                    {t.priority || 'Normal'}
+                  </span>
+                  <span className={`badge ${STATUS_CLASS[t.status]}`} style={{ fontSize: 10.5 }}>
+                    {STATUS_LABEL[t.status] || t.status}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
         <div className="card" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-          <div className="card-header" style={{ position: 'sticky', top: 0, backgroundColor: 'inherit', zIndex: 1, paddingBottom: '10px' }}>
+          <div className="card-header" style={{ position: 'sticky', top: '-20px', backgroundColor: 'var(--bg-card)', zIndex: 10, padding: '20px 0 15px 0', margin: '-20px 0 0 0', borderBottom: '1px solid var(--border-light)' }}>
             <span className="card-title">Histórico de Atividades</span>
           </div>
           {recentActivities?.length === 0 && (

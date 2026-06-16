@@ -106,9 +106,23 @@ exports.getDashboard = async (req, res) => {
       }
     });
 
+    const priorityWeight = { alta: 3, media: 2, baixa: 1 };
     const tasksThisWeek = tasks
       .filter(t => t.dueDate && new Date(t.dueDate) >= startOfWeek && new Date(t.dueDate) <= endOfWeek)
-      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      .sort((a, b) => {
+        const dateA = new Date(a.dueDate);
+        const dateB = new Date(b.dueDate);
+        
+        // Compare dates ignoring time
+        const dayA = new Date(dateA.getFullYear(), dateA.getMonth(), dateA.getDate()).getTime();
+        const dayB = new Date(dateB.getFullYear(), dateB.getMonth(), dateB.getDate()).getTime();
+        
+        if (dayA !== dayB) return dayA - dayB;
+        
+        const weightA = priorityWeight[a.priority] || 0;
+        const weightB = priorityWeight[b.priority] || 0;
+        return weightB - weightA;
+      });
 
     res.json({
       metrics: {
