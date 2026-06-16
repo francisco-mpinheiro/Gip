@@ -2,6 +2,34 @@ const { v4: uuidv4 } = require('uuid');
 const { ROLES } = require('../config/database');
 const prisma = require('../config/prisma');
 
+async function checkImmediateDeadline(task) {
+  if (!task.dueDate || !task.assigneeId || task.status === 'concluida') return;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dueDateStr = task.dueDate.toISOString().split('T')[0];
+  const [y, m, d] = dueDateStr.split('-');
+  const dueDate = new Date(y, m - 1, d);
+  dueDate.setHours(0, 0, 0, 0);
+
+  const diffTime = dueDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 2) {
+    await prisma.notification.create({
+      data: { content: `O prazo da tarefa "${task.title}" se encerra em 2 dias.`, userId: task.assigneeId, taskId: task.id, projectId: task.projectId }
+    });
+  } else if (diffDays === 1) {
+    await prisma.notification.create({
+      data: { content: `O prazo da tarefa "${task.title}" se encerra amanhã!`, userId: task.assigneeId, taskId: task.id, projectId: task.projectId }
+    });
+  } else if (diffDays === 0) {
+    await prisma.notification.create({
+      data: { content: `Atenção: O prazo da tarefa "${task.title}" se encerra HOJE!`, userId: task.assigneeId, taskId: task.id, projectId: task.projectId }
+    });
+  }
+}
+
 const recalcProgress = async (projectId) => {
   try {
     const tasks = await prisma.task.findMany({ where: { projectId } });
@@ -115,6 +143,8 @@ exports.create = async (req, res) => {
       });
     }
 
+    await checkImmediateDeadline(newTask);
+
     await recalcProgress(projectId);
 
     res.status(201).json(newTask);
@@ -164,6 +194,8 @@ exports.update = async (req, res) => {
         }
       });
     }
+
+    await checkImmediateDeadline(updatedTask);
 
     await recalcProgress(task.projectId);
 

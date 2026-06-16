@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatDateLocal } from '../utils/dateUtils';
 import AppLayout from '../components/layout/AppLayout';
 import { dashboardAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
@@ -63,7 +64,7 @@ export default function DashboardPage() {
               <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-blue)' }}>rocket_launch</span>
             </div>
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: '#fff' }}>{metrics?.activeProjects || 0}</div>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: 'var(--text-primary)' }}>{metrics?.activeProjects || 0}</div>
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
@@ -72,7 +73,7 @@ export default function DashboardPage() {
               <span className="material-icons" style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>task_alt</span>
             </div>
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: '#fff' }}>{metrics?.completedTasks || 0}</div>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: 'var(--text-primary)' }}>{metrics?.completedTasks || 0}</div>
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
@@ -81,16 +82,16 @@ export default function DashboardPage() {
               <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-amber)' }}>groups</span>
             </div>
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: '#fff' }}>{metrics?.totalMembers || 0}</div>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: 'var(--text-primary)' }}>{metrics?.totalMembers || 0}</div>
         </div>
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-label" style={{ marginTop: 0 }}>Horas<br />Trabalhadas</div>
+            <div className="metric-label" style={{ marginTop: 0 }}>Tarefas<br />Atrasadas</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
-              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-blue)' }}>schedule</span>
+              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-red)' }}>assignment_late</span>
             </div>
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: '#fff' }}>{metrics?.hoursWorked || 0}h</div>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: 'var(--text-primary)' }}>{metrics?.overdueTasks || 0}</div>
         </div>
       </div>
 
@@ -116,7 +117,7 @@ export default function DashboardPage() {
                 <span className="project-meta-item"><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>group</span> {p.memberCount}</span>
                 {p.endDate && (
                   <span className="project-meta-item">
-                    <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(p.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(p.endDate, { day: '2-digit', month: 'short', year: 'numeric' })}
                   </span>
                 )}
               </div>
@@ -172,7 +173,7 @@ export default function DashboardPage() {
                   <div className="task-meta">
                     {t.project && <span className="task-project">{t.project.name}</span>}
                     <span className="task-date">
-                      Prazo: {new Date(t.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      Prazo: {formatDateLocal(t.dueDate, { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
                   </div>
                 </div>

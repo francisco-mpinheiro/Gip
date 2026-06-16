@@ -98,7 +98,9 @@ export default function Topbar({ title }) {
               {notifications.length === 0 ? (
                 <span style={{ fontSize: '14px', color: '#888' }}>Nenhuma notificação.</span>
               ) : (
-                notifications.map(notif => (
+                notifications.map(notif => {
+                  const isDeadline = notif.content.toLowerCase().includes('prazo') || notif.content.toLowerCase().includes('encerra');
+                  return (
                   <div 
                     key={notif.id} 
                     onClick={async () => {
@@ -116,21 +118,40 @@ export default function Topbar({ title }) {
                     }}
                     style={{ 
                       padding: '10px', 
-                      background: notif.isRead ? 'transparent' : 'var(--bg-card)', 
+                      background: notif.isRead ? 'transparent' : (isDeadline ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-card)'), 
                       borderRadius: '6px', 
                       width: '100%', 
                       cursor: 'pointer',
-                      borderLeft: notif.isRead ? '3px solid transparent' : '3px solid var(--primary)',
+                      borderLeft: notif.isRead ? '3px solid transparent' : (isDeadline ? '3px solid #f59e0b' : '3px solid var(--primary)'),
                       opacity: notif.isRead ? 0.7 : 1,
-                      transition: 'background 0.2s'
+                      transition: 'background 0.2s',
+                      display: 'flex',
+                      gap: '10px',
+                      alignItems: 'flex-start'
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = notif.isRead ? 'transparent' : 'var(--bg-card)'; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = isDeadline ? 'rgba(245, 158, 11, 0.2)' : 'var(--bg-input)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = notif.isRead ? 'transparent' : (isDeadline ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-card)'); }}
                   >
-                    <div style={{ fontSize: '13px', marginBottom: '4px' }}>{notif.content}</div>
-                    <div style={{ fontSize: '11px', color: '#888' }}>{new Date(notif.createdAt).toLocaleString()}</div>
+                    <span className="material-symbols-outlined" style={{ 
+                      fontSize: '20px', 
+                      color: isDeadline ? '#f59e0b' : 'var(--primary)',
+                      marginTop: '2px'
+                    }}>
+                      {isDeadline ? 'alarm_on' : 'assignment_ind'}
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        marginBottom: '4px',
+                        color: isDeadline && !notif.isRead ? '#f59e0b' : 'var(--text-primary)',
+                        fontWeight: isDeadline && !notif.isRead ? 600 : 400
+                      }}>
+                        {notif.content}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#888' }}>{new Date(notif.createdAt).toLocaleString()}</div>
+                    </div>
                   </div>
-                ))
+                )})
               )}
             </div>
           </div>

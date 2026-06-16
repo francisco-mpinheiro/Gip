@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { projectsAPI, tasksAPI, usersAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { formatDateLocal } from '../utils/dateUtils';
 
 const COLUMNS = [
   { key: 'a_fazer', label: 'A Fazer', color: '#94a3b8' },
@@ -132,7 +133,7 @@ export default function ProjectDetailPage() {
                 <span style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>group</span> {members.length} membros</span>
                 {project.endDate && (
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(project.endDate).toLocaleDateString('pt-BR')}
+                    <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(project.endDate)}
                   </span>
                 )}
               </div>
@@ -210,7 +211,7 @@ export default function ProjectDetailPage() {
                         )}
                         {task.dueDate && (
                           <span className={`kanban-card-date ${overdue ? 'overdue' : ''}`}>
-                            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(task.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(task.dueDate, { day: '2-digit', month: 'short' })}
                           </span>
                         )}
                       </div>

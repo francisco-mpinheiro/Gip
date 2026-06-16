@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { tasksAPI, projectsAPI, usersAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { formatDateLocal } from '../utils/dateUtils';
 
 const STATUS_LABEL = { a_fazer: 'A Fazer', em_andamento: 'Em Andamento', concluido: 'Concluído' };
 const STATUS_CLASS = { a_fazer: 'badge-a_fazer', em_andamento: 'badge-em_andamento', concluido: 'badge-concluido' };
@@ -269,7 +270,7 @@ export default function TasksPage() {
                       {t.assignee && <div className="avatar sm" title={t.assignee.name}>{t.assignee.avatar}</div>}
                       {t.dueDate && (
                         <span className={`kanban-card-date ${t.overdue ? 'overdue' : ''}`}>
-                          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(t.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(t.dueDate, { day: '2-digit', month: 'short' })}
                         </span>
                       )}
                     </div>
@@ -340,7 +341,7 @@ export default function TasksPage() {
                         </select>
                       </td>
                       <td style={{ fontSize: 12.5, color: t.overdue ? 'var(--accent-red)' : 'var(--text-secondary)' }}>
-                        {t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : '—'}
+                        {t.dueDate ? formatDateLocal(t.dueDate) : '—'}
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 6 }}>
@@ -488,7 +489,7 @@ export default function TasksPage() {
                 <div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Prazo</div>
                   <div style={{ fontSize: 13.5, color: viewingTask.overdue ? 'var(--accent-red)' : 'var(--text-primary)', fontWeight: viewingTask.overdue ? 600 : 400 }}>
-                    {viewingTask.dueDate ? new Date(viewingTask.dueDate).toLocaleDateString('pt-BR') : 'Sem prazo'}
+                    {viewingTask.dueDate ? formatDateLocal(viewingTask.dueDate) : 'Sem prazo'}
                   </div>
                 </div>
               </div>

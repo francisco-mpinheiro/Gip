@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { projectsAPI, usersAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { formatDateLocal } from '../utils/dateUtils';
 
 const STATUS_OPTS = [
   { value: 'planejamento', label: 'Planejamento' },
@@ -175,7 +176,7 @@ export default function ProjectsPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {p.endDate && (
                       <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {new Date(p.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                        <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(p.endDate, { day: '2-digit', month: 'short' })}
                       </span>
                     )}
                     {canDo('edit_project') && (

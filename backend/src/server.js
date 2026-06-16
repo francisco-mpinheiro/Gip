@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { seedDatabase } = require('./config/database');
 const routes = require('./routes');
+const { initCronJobs } = require('./jobs/deadlineNotifications');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,6 +26,7 @@ app.use((err, req, res, next) => {
 });
 
 seedDatabase().then(() => { // trigger restart
+  initCronJobs();
   app.listen(PORT, () => {
     console.log(`\n🚀 GIP API rodando em http://localhost:${PORT}`);
     console.log(`\n📋 Usuários de teste:`);
