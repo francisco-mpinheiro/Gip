@@ -4,6 +4,8 @@ import AppLayout from '../components/layout/AppLayout';
 import { projectsAPI, tasksAPI, usersAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { formatDateLocal } from '../utils/dateUtils';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const COLUMNS = [
   { key: 'a_fazer', label: 'A Fazer', color: '#94a3b8' },
@@ -96,6 +98,47 @@ export default function ProjectDetailPage() {
 
   const members = project.members || [];
 
+  const handleGenerateReport = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text(`Relatório do Projeto: ${project.name}`, 14, 22);
+
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`, 14, 30);
+
+    const maxRows = Math.max(
+      (tasksByStatus.a_fazer || []).length,
+      (tasksByStatus.em_andamento || []).length,
+      (tasksByStatus.concluido || []).length
+    );
+
+    const bodyData = [];
+    for (let i = 0; i < maxRows; i++) {
+      const todoTask = (tasksByStatus.a_fazer || [])[i]?.title || '';
+      const inProgressTask = (tasksByStatus.em_andamento || [])[i]?.title || '';
+      const doneTask = (tasksByStatus.concluido || [])[i]?.title || '';
+      bodyData.push([todoTask, inProgressTask, doneTask]);
+    }
+
+    autoTable(doc, {
+      startY: 38,
+      head: [['A Fazer', 'Em Andamento', 'Concluída']],
+      body: bodyData,
+      theme: 'grid',
+      headStyles: { fillColor: [44, 62, 80], textColor: 255 },
+      styles: { fontSize: 10, cellPadding: 4, textColor: [40, 40, 40] },
+      columnStyles: {
+        0: { cellWidth: '33%' },
+        1: { cellWidth: '33%' },
+        2: { cellWidth: '33%' },
+      },
+    });
+
+    doc.save(`Relatorio_${project.name.replace(/\s+/g, '_')}.pdf`);
+  };
+
   return (
     <AppLayout>
       {/* HEADER */}
@@ -111,6 +154,9 @@ export default function ProjectDetailPage() {
             <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 4 }}>{project.description}</p>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button className="btn btn-secondary" onClick={handleGenerateReport} style={{ display: 'flex', alignItems: 'center' }}>
+              Gerar Relatório
+            </button>
             {canDo('create_task') && (
               <button className="btn btn-primary" onClick={openCreateTask}>+ Nova Tarefa</button>
             )}
