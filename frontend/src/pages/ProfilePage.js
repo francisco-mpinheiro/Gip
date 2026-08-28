@@ -74,25 +74,7 @@ export default function ProfilePage() {
                 <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Tarefas</div>
               </div>
             </div>
-          </div>
-
-          <div className="card" style={{ marginTop: 16, padding: '16px 20px' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12 }}>Permissões</div>
-            {[
-              { label: 'Gerenciar Usuários', ok: ['admin_platform', 'admin_company'].includes(user?.role) },
-              { label: 'Criar Projetos', ok: ['admin_platform', 'admin_company', 'manager_area', 'project_manager'].includes(user?.role) },
-              { label: 'Criar Tarefas', ok: ['admin_platform', 'admin_company', 'manager_area', 'project_manager'].includes(user?.role) },
-              { label: 'Ver Desempenho', ok: ['admin_platform', 'admin_company', 'manager_area', 'project_manager'].includes(user?.role) },
-              { label: 'Ver Equipe', ok: true },
-            ].map(p => (
-              <div key={p.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{p.label}</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: p.ok ? 'var(--accent-green)' : 'var(--text-muted)' }}>
-                  {p.ok ? '✓ Sim' : '✕ Não'}
-                </span>
-              </div>
-            ))}
-          </div>
+           </div>
         </div>
 
         {/* EDIT FORM */}
