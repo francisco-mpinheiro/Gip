@@ -5,6 +5,7 @@ import { PreferencesProvider } from './context/PreferencesContext';
 import './styles/global.css';
 
 import LoginPage from './pages/LoginPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
@@ -52,6 +53,7 @@ function AppRoutes() {
       <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
       <Route path="/users" element={<PrivateRoute adminOnly><UsersPage /></PrivateRoute>} />
 
+      <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

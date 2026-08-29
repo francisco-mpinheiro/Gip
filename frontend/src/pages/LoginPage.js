@@ -241,10 +241,8 @@ export default function LoginPage() {
                 {DEMO_USERS.map((u) => (
                   <button
                     key={u.email}
+                    onClick={() => setForm({ email: u.email, password: '123456' })}
                     style={css.demoBtn}
-                    onClick={() =>
-                      setForm({ email: u.email, password: "123456" })
-                    }
                   >
                     <span style={{ ...css.demoDot, background: u.color }} />
                     <span style={css.demoRole}>{u.label}</span>
@@ -262,6 +260,41 @@ export default function LoginPage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ForgotPassword({ onBack }) {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
+
+  const handle = async (e) => {
+    e.preventDefault(); setErr(''); setMsg(''); setLoading(true);
+    try {
+      await fetch('/api/auth/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+      setMsg('Se o email existir, um link foi enviado (verifique logs em dev)');
+    } catch (e) { setErr('Erro ao processar'); }
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      {err && <div style={css.errBox}>⚠ {err}</div>}
+      {msg && <div style={{ background: '#eef', padding: 8, borderRadius: 6 }}>{msg}</div>}
+      <form onSubmit={handle} style={{ marginTop: 12 }}>
+        <div style={css.fieldGroup}>
+          <label style={css.label}>Email</label>
+          <div style={css.inputWrap}>
+            <input style={css.input} type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn" type="button" onClick={onBack}>Voltar</button>
+          <button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Enviando...' : 'Enviar link'}</button>
+        </div>
+      </form>
     </div>
   );
 }

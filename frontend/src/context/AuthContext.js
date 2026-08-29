@@ -65,8 +65,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUser = (u) => setUser(u);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, canDo: (action) => canDo(user, action) }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, canDo: (action) => canDo(user, action) }}>
       {children}
     </AuthContext.Provider>
   );

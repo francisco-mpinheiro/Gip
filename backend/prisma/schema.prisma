@@ -27,6 +27,11 @@ model User {
   id         String   @id @default(uuid())
   name       String
   email      String   @unique
+  pendingEmail String?
+  emailToken    String?
+  emailTokenExpiry DateTime?
+  resetToken     String?
+  resetTokenExpiry DateTime?
   cpf        String   @unique
   password   String
   role       Role     @default(employee)
@@ -44,9 +49,25 @@ model User {
   comments        Comment[]
   notifications   Notification[]
   attachments     TaskAttachment[]
+  educations      Education[]
 
   @@map("users")
 }
+
+model Education {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institution  String
+  degree       String
+  startDate    DateTime?
+  endDate      DateTime?
+  certificateUrl String?
+  createdAt    DateTime @default(now())
+
+  @@map("educations")
+}
+
 
 model Project {
   id          String   @id @default(uuid())
