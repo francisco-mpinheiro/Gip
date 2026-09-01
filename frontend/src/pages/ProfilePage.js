@@ -5,9 +5,9 @@ import UserProfile from '../components/UserProfile';
 export default function ProfilePage() {
   return (
     <AppLayout>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800 }}>Meu Perfil</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 4 }}>Gerencie suas informações pessoais</p>
+      <div className="page-header">
+        <h1>Meu Perfil</h1>
+        <p>Visão geral dos seus projetos, tarefas e formações.</p>
       </div>
       <UserProfile />
     </AppLayout>

@@ -79,7 +79,7 @@ exports.updateProfile = async (req, res) => {
 };
 
 const passwordSchema = z.object({
-  currentPassword: z.string().min(6),
+  currentPassword: z.string(),
   newPassword: z.string().min(6),
 });
 

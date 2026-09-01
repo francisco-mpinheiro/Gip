@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { profileAPI, educationAPI, projectsAPI, tasksAPI } from '../utils/api';
+import { profileAPI, educationAPI } from '../utils/api';
 
 export default function UserProfile() {
   const { user, updateUser, logout } = useAuth();
 
-  const [mode, setMode] = useState('read');
   const [local, setLocal] = useState({ name: '', email: '', department: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -16,10 +15,7 @@ export default function UserProfile() {
   const [eduForm, setEduForm] = useState({ institution: '', degree: '', startDate: '', endDate: '', certificate: null });
   const [preview, setPreview] = useState(null);
 
-  const [projects, setProjects] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [loadingProjects, setLoadingProjects] = useState(false);
-  const [loadingTasks, setLoadingTasks] = useState(false);
+
 
   useEffect(() => {
     if (user) setLocal({ name: user.name || '', email: user.email || '', department: user.department || '' });
@@ -27,8 +23,6 @@ export default function UserProfile() {
 
   useEffect(() => {
     fetchEducations();
-    fetchProjects();
-    fetchTasks();
   }, []);
 
   const fetchEducations = async () => {
@@ -40,38 +34,19 @@ export default function UserProfile() {
     }
   };
 
-  const fetchProjects = async () => {
-    setLoadingProjects(true);
-    try {
-      const res = await projectsAPI.getAll();
-      setProjects(res.data || []);
-    } catch (err) {
-      console.error(err);
-      setProjects([]);
-    } finally { setLoadingProjects(false); }
-  };
 
-  const fetchTasks = async () => {
-    setLoadingTasks(true);
-    try {
-      const res = await tasksAPI.getAll();
-      setTasks(res.data || []);
-    } catch (err) {
-      console.error(err);
-      setTasks([]);
-    } finally { setLoadingTasks(false); }
-  };
 
-  const beginEdit = () => setMode('edit');
-  const cancelEdit = () => { setMode('read'); setError(''); };
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const save = async () => {
+  const handleSaveClick = () => setShowConfirmModal(true);
+
+  const performSave = async () => {
+    setShowConfirmModal(false);
     setSaving(true); setError(''); setSuccess('');
     try {
       const res = await profileAPI.update({ name: local.name, email: local.email, department: local.department });
       if (res.data) updateUser(res.data);
       setSuccess('Perfil atualizado com sucesso');
-      setMode('read');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao salvar');
@@ -125,34 +100,26 @@ export default function UserProfile() {
 
   if (!user) return <div>Carregando...</div>;
 
+  const hasChanges = user ? (local.name !== (user.name || '') || local.email !== (user.email || '') || local.department !== (user.department || '')) : false;
+
   return (
     <div>
-      <div className="page-header">
-        <h1>Meu Perfil</h1>
-        <p>Visão geral dos seus projetos, tarefas e formações.</p>
-      </div>
-
       <div className="grid-2" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
         <div>
           <div className="card" style={{ textAlign: 'center', padding: 28 }}>
             <div className="avatar xl" style={{ margin: '0 auto 12px', width: 80, height: 80, fontSize: 28, borderRadius: 14, background: 'linear-gradient(135deg,#3b82f6,#6366f1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{user.avatar}</div>
             <div style={{ fontSize: 20, fontWeight: 800 }}>{user.name}</div>
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6 }}>{user.email}</div>
-            <div style={{ marginTop: 12 }}>
-              <span className="badge" style={{ padding: '6px 12px' }}>{user.role}</span>
-            </div>
-            {user.department && <div style={{ marginTop: 10, fontSize: 13, color: 'var(--text-muted)' }}>🏢 {user.department}</div>}
-            <div className="divider" />
-            <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
-              <div>
-                <div className="metric-value" style={{ fontSize: 20 }}>{loadingProjects ? '…' : projects.length}</div>
-                <div className="metric-label">Projetos</div>
+
+            {user.department && (
+              <div style={{ marginTop: 10, fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>badge</span>
+                <span>{user.department}</span>
               </div>
-              <div>
-                <div className="metric-value" style={{ fontSize: 20 }}>{loadingTasks ? '…' : tasks.length}</div>
-                <div className="metric-label">Tarefas</div>
-              </div>
-            </div>
+            )}
+
+
+
           </div>
         </div>
 
@@ -161,115 +128,43 @@ export default function UserProfile() {
             <div className="card-header" style={{ marginBottom: 12 }}>
               <div className="card-title">Dados Pessoais</div>
               <div>
-                {mode === 'read' ? (
-                  <button className="btn" onClick={() => setMode('edit')}>Editar</button>
-                ) : (
-                  <>
-                    <button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</button>
-                    <button className="btn btn-ghost" onClick={cancelEdit}>Cancelar</button>
-                  </>
+                {hasChanges && (
+                  <button className="btn btn-primary" onClick={handleSaveClick} disabled={saving}>{saving ? 'Salvando...' : 'Salvar Edição'}</button>
                 )}
               </div>
             </div>
 
-            {success && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#4ade80', marginBottom: 12 }}>✓ {success}</div>}
-            {error && <div className="auth-error" style={{ marginBottom: 12 }}>⚠ {error}</div>}
-
             <div className="form-group">
               <label className="form-label">Nome</label>
-              <input className="form-input" value={local.name} onChange={e => setLocal(s => ({ ...s, name: e.target.value }))} disabled={mode === 'read'} />
+              <input className="form-input" value={local.name} onChange={e => setLocal(s => ({ ...s, name: e.target.value }))} />
             </div>
 
             <div className="form-group">
               <label className="form-label">Email</label>
-              <input className="form-input" type="email" value={local.email} onChange={e => setLocal(s => ({ ...s, email: e.target.value }))} disabled={mode === 'read'} />
+              <input className="form-input" type="email" value={local.email} onChange={e => setLocal(s => ({ ...s, email: e.target.value }))} />
             </div>
 
             <div className="form-group">
               <label className="form-label">Departamento</label>
-              <input className="form-input" value={local.department} onChange={e => setLocal(s => ({ ...s, department: e.target.value }))} disabled={mode === 'read'} />
+              <input className="form-input" value={local.department} onChange={e => setLocal(s => ({ ...s, department: e.target.value }))} />
             </div>
-
-            <div className="divider" />
-
-            {mode === 'read' && (
-              <div style={{ marginTop: 12 }}>
-                <div className="card-header"><div className="card-title">Projetos</div></div>
-                {loadingProjects ? (
-                  <div style={{ color: 'var(--text-secondary)' }}>Carregando projetos...</div>
-                ) : projects.length === 0 ? (
-                  <div style={{ color: 'var(--text-secondary)' }}>Nenhum projeto encontrado.</div>
-                ) : (
-                  <div>
-                    {projects.map(p => (
-                      <div key={p.id} className="project-item">
-                        <div className="project-item-header">
-                          <div className="project-name">{p.name}</div>
-                          <div className="project-pct">{p.progress || 0}%</div>
-                        </div>
-                        <div className="project-meta">
-                          <div className="project-meta-item">{p.status}</div>
-                          <div className="project-meta-item">{(p.memberCount || 0) + ' membros'}</div>
-                        </div>
-                        <div className="progress-bar" style={{ marginTop: 8 }}>
-                          <div className={`progress-bar-fill progress-blue`} style={{ width: `${p.progress || 0}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div style={{ height: 16 }} />
-
-                <div className="card-header"><div className="card-title">Tarefas</div></div>
-                {loadingTasks ? (
-                  <div style={{ color: 'var(--text-secondary)' }}>Carregando tarefas...</div>
-                ) : tasks.length === 0 ? (
-                  <div style={{ color: 'var(--text-secondary)' }}>Nenhuma tarefa encontrada.</div>
-                ) : (
-                  <div>
-                    {tasks.map(t => (
-                      <div key={t.id} className="task-item">
-                        <div className={`task-checkbox ${t.status === 'concluido' ? 'checked' : ''}`} />
-                        <div className="task-content">
-                          <div className={`task-title ${t.status === 'concluido' ? 'done' : ''}`}>{t.title}</div>
-                          <div className="task-meta">
-                            <div className="task-project">{t.project?.name || ''}</div>
-                            <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{t.assignee?.name || ''}</div>
-                          </div>
-                        </div>
-                        <div style={{ fontSize: 12, color: t.overdue ? 'var(--accent-red)' : 'var(--text-secondary)' }}>{t.status}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {mode === 'edit' && (
-              <>
-                <div className="divider" style={{ marginTop: 14 }} />
-
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Segurança</div>
-                  <form onSubmit={changePassword}>
-                    <div className="form-row">
-                      <div className="form-group"><label className="form-label">Senha Atual</label><input className="form-input" type="password" value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label">Nova Senha</label><input className="form-input" type="password" value={pwNew} onChange={e => setPwNew(e.target.value)} /></div>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
-                      <button type="submit" className="btn btn-primary">Alterar Senha</button>
-                    </div>
-                  </form>
-                </div>
-              </>
-            )}
 
             <div className="divider" style={{ marginTop: 14 }} />
 
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12 }}>
-              <button className="btn btn-danger" onClick={logout}>Sair da Conta</button>
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Segurança</div>
+              <form onSubmit={changePassword}>
+                <div className="form-row">
+                  <div className="form-group"><label className="form-label">Senha Atual</label><input className="form-input" type="password" value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} /></div>
+                  <div className="form-group"><label className="form-label">Nova Senha</label><input className="form-input" type="password" value={pwNew} onChange={e => setPwNew(e.target.value)} /></div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+                  <button type="submit" className="btn btn-primary">Alterar Senha</button>
+                </div>
+              </form>
             </div>
+
+
           </div>
         </div>
       </div>
@@ -339,6 +234,8 @@ export default function UserProfile() {
         </div>
       )}
 
+
+
       {preview && (
         <div className="modal-overlay" onClick={() => setPreview(null)}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ padding: 16, maxWidth: '90vw' }}>
@@ -353,6 +250,45 @@ export default function UserProfile() {
           </div>
         </div>
       )}
+
+      {showConfirmModal && (
+        <div className="modal-overlay" onClick={() => setShowConfirmModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ padding: 24, maxWidth: 400, textAlign: 'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--accent-blue)', marginBottom: 16 }}>help</span>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Salvar Alterações</div>
+            <div style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>Tem certeza que deseja salvar as alterações no seu perfil?</div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button className="btn" onClick={() => setShowConfirmModal(false)}>Cancelar</button>
+              <button className="btn btn-primary" onClick={performSave}>Sim, Salvar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notifications */}
+      <style>{`
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-animate {
+          animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+      <div style={{ position: 'fixed', bottom: 24, right: 24, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 9999 }}>
+        {success && (
+          <div className="toast-animate" style={{ background: '#10b981', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>check_circle</span>
+            <span style={{ fontSize: 14, fontWeight: 500 }}>{success}</span>
+          </div>
+        )}
+        {error && (
+          <div className="toast-animate" style={{ background: '#ef4444', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>error</span>
+            <span style={{ fontSize: 14, fontWeight: 500 }}>{error}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
