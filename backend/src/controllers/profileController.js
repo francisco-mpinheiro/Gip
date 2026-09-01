@@ -7,6 +7,8 @@ const profileSchema = z.object({
   name: z.string().min(2).optional(),
   email: z.string().email().optional(),
   department: z.string().optional(),
+  avatar: z.string().optional(),
+  avatarRemoved: z.coerce.boolean().optional(),
 });
 
 exports.getProfile = async (req, res) => {
@@ -25,23 +27,38 @@ exports.updateProfile = async (req, res) => {
     const parsed = profileSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: 'Dados inválidos', errors: parsed.error.errors });
 
+    const currentUser = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!currentUser) return res.status(404).json({ message: 'Usuário não encontrado' });
+
     const data = {};
     if (parsed.data.name) {
       data.name = parsed.data.name;
-      data.avatar = parsed.data.name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+      if (!currentUser.avatar || !currentUser.avatar.startsWith('/uploads/')) {
+        data.avatar = parsed.data.name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+      }
     }
 
     if (parsed.data.department !== undefined) data.department = parsed.data.department;
 
+    if (req.file) {
+      data.avatar = `/uploads/${req.file.filename}`;
+    }
+
+    if (parsed.data.avatarRemoved === true) {
+      data.avatar = null;
+    }
+
+    if (parsed.data.avatar && !req.file && parsed.data.avatar !== currentUser.avatar) {
+      data.avatar = parsed.data.avatar;
+    }
+
     if (parsed.data.email && parsed.data.email !== req.user.email) {
-      // Update primary email directly (business decision) but still generate a token for confirmation/testing
       data.email = parsed.data.email;
       const token = crypto.randomBytes(20).toString('hex');
       data.emailToken = token;
-      data.emailTokenExpiry = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24h
+      data.emailTokenExpiry = new Date(Date.now() + 1000 * 60 * 60 * 24);
       const host = process.env.FRONTEND_URL || 'http://localhost:3000';
       const confirmLink = `${host}/confirm-email?token=${token}`;
-      // If SMTP configured, send confirmation email, otherwise log in dev
       if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
         try {
           const nodemailer = require('nodemailer');
@@ -66,7 +83,6 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
-    // Ensure role is never changed via this endpoint
     delete parsed.data.role;
 
     const updatedUser = await prisma.user.update({ where: { id: req.user.id }, data });

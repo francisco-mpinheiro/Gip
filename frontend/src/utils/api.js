@@ -38,7 +38,12 @@ export const usersAPI = {
 
 export const profileAPI = {
   get: () => API.get('/user/profile'),
-  update: (data) => API.put('/user/profile', data),
+  update: (data) => {
+    if (data instanceof FormData) {
+      return API.put('/user/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+    }
+    return API.put('/user/profile', data);
+  },
   changePassword: (data) => API.post('/user/change-password', data),
 };
 

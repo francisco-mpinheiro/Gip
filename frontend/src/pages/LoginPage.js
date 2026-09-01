@@ -31,7 +31,7 @@ const FEATURES = [
 ];
 
 const DEMO_USERS = [
-  { label: "Admin Plataforma", email: "admin@gip.com", color: "#ef4444" },
+  { label: "Admin Plataforma", email: "admin@taskflow.com", color: "#ef4444" },
   { label: "Admin Empresa", email: "carlos@empresa.com", color: "#f59e0b" },
   { label: "Gestora de Área", email: "ana@empresa.com", color: "#8b5cf6" },
   { label: "Gerente Projeto", email: "bruno@empresa.com", color: "#3b82f6" },

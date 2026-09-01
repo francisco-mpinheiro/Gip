@@ -65,7 +65,16 @@ router.get('/chat/:userId', authenticate, chatCtrl.getHistory);
 
 // ─── PROFILE (usuário autenticado) ───────────────────────────────────────────
 router.get('/user/profile', authenticate, profileCtrl.getProfile);
-router.put('/user/profile', authenticate, profileCtrl.updateProfile);
+router.put('/user/profile', authenticate,
+  upload.create({
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+      cb(null, allowed.includes(file.mimetype));
+    }
+  }).single('avatar'),
+  profileCtrl.updateProfile
+);
 router.post('/user/change-password', authenticate, profileCtrl.changePassword);
 
 // ─── EDUCAÇÕES / FORMAÇÕES ───────────────────────────────────────────────────

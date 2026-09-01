@@ -9,16 +9,34 @@ export default function UserProfile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarRemoved, setAvatarRemoved] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState('');
 
   const [educations, setEducations] = useState([]);
   const [showEduModal, setShowEduModal] = useState(false);
   const [eduForm, setEduForm] = useState({ institution: '', degree: '', startDate: '', endDate: '', certificate: null });
   const [preview, setPreview] = useState(null);
 
+  const getAvatarSource = () => {
+    if (avatarPreview) return avatarPreview;
+    if (avatarRemoved) return null;
+    if (user?.avatar && String(user.avatar).startsWith('/uploads/')) return user.avatar;
+    return null;
+  };
 
+  const getInitials = () => {
+    const baseName = user?.name || local.name || 'U';
+    return baseName.split(' ').filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase() || 'U';
+  };
 
   useEffect(() => {
-    if (user) setLocal({ name: user.name || '', email: user.email || '', department: user.department || '' });
+    if (user) {
+      setLocal({ name: user.name || '', email: user.email || '', department: user.department || '' });
+      setAvatarPreview('');
+      setAvatarFile(null);
+      setAvatarRemoved(false);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -40,13 +58,43 @@ export default function UserProfile() {
 
   const handleSaveClick = () => setShowConfirmModal(true);
 
+  const handleAvatarPick = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Selecione uma imagem válida para o perfil.');
+      return;
+    }
+    setError('');
+    setAvatarRemoved(false);
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const removeAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview('');
+    setAvatarRemoved(true);
+    setError('');
+  };
+
   const performSave = async () => {
     setShowConfirmModal(false);
     setSaving(true); setError(''); setSuccess('');
     try {
-      const res = await profileAPI.update({ name: local.name, email: local.email, department: local.department });
+      const formData = new FormData();
+      formData.append('name', local.name);
+      formData.append('email', local.email);
+      formData.append('department', local.department || '');
+      if (avatarFile) formData.append('avatar', avatarFile);
+      if (avatarRemoved) formData.append('avatarRemoved', 'true');
+
+      const res = await profileAPI.update(formData);
       if (res.data) updateUser(res.data);
       setSuccess('Perfil atualizado com sucesso');
+      setAvatarFile(null);
+      setAvatarRemoved(false);
+      setAvatarPreview('');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao salvar');
@@ -100,14 +148,82 @@ export default function UserProfile() {
 
   if (!user) return <div>Carregando...</div>;
 
-  const hasChanges = user ? (local.name !== (user.name || '') || local.email !== (user.email || '') || local.department !== (user.department || '')) : false;
+  const hasChanges = user
+    ? (
+        local.name !== (user.name || '') ||
+        local.email !== (user.email || '') ||
+        local.department !== (user.department || '') ||
+        Boolean(avatarFile) ||
+        avatarRemoved
+      )
+    : false;
 
   return (
     <div>
       <div className="grid-2" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
         <div>
           <div className="card" style={{ textAlign: 'center', padding: 28 }}>
-            <div className="avatar xl" style={{ margin: '0 auto 12px', width: 80, height: 80, fontSize: 28, borderRadius: 14, background: 'linear-gradient(135deg,#3b82f6,#6366f1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{user.avatar}</div>
+            <div style={{ position: 'relative', width: 110, height: 110, margin: '0 auto 14px', borderRadius: '50%', overflow: 'hidden', background: 'linear-gradient(135deg,#3b82f6,#6366f1)', border: '3px solid rgba(59,130,246,0.18)', boxShadow: '0 12px 30px rgba(59,130,246,0.18)' }}>
+              {getAvatarSource() ? (
+                <img
+                  src={getAvatarSource()}
+                  alt={user.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 28 }}>
+                  {getInitials()}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+              <label
+                htmlFor="profile-avatar-input"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: 70,
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  background: 'rgba(59,130,246,0.12)',
+                  color: 'var(--accent-blue)',
+                  border: '1px solid rgba(59,130,246,0.25)',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  MozUserSelect: 'none',
+                  transition: 'all 0.2s ease',
+                  margin: 0,
+                }}
+              >
+                Editar
+              </label>
+              <button
+                type="button"
+                onClick={removeAvatar}
+                style={{
+                  minWidth: 70,
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  background: 'rgba(239,68,68,0.10)',
+                  color: 'var(--accent-red)',
+                  border: '1px solid rgba(239,68,68,0.25)',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  margin: 0,
+                }}
+              >
+                Excluir
+              </button>
+              <input id="profile-avatar-input" type="file" accept="image/*" onChange={handleAvatarPick} hidden />
+            </div>
+
             <div style={{ fontSize: 20, fontWeight: 800 }}>{user.name}</div>
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6 }}>{user.email}</div>
 
@@ -117,9 +233,6 @@ export default function UserProfile() {
                 <span>{user.department}</span>
               </div>
             )}
-
-
-
           </div>
         </div>
 
