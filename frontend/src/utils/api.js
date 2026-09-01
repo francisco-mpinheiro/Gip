@@ -86,4 +86,8 @@ export const notificationsAPI = {
   markAllAsRead: () => API.patch('/notifications/read-all'),
 };
 
+export const chatAPI = {
+  getHistory: (userId) => API.get(`/chat/${userId}`),
+};
+
 export default API;

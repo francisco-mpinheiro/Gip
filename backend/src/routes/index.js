@@ -59,6 +59,10 @@ router.patch('/notifications/:id/read', authenticate, notificationsCtrl.markAsRe
 router.get('/dashboard', authenticate, dashboardCtrl.getDashboard);
 router.get('/performance', authenticate, dashboardCtrl.getPerformance);
 
+// ─── CHAT ────────────────────────────────────────────────────────────────────
+const chatCtrl = require('../controllers/chatController');
+router.get('/chat/:userId', authenticate, chatCtrl.getHistory);
+
 // ─── PROFILE (usuário autenticado) ───────────────────────────────────────────
 router.get('/user/profile', authenticate, profileCtrl.getProfile);
 router.put('/user/profile', authenticate, profileCtrl.updateProfile);

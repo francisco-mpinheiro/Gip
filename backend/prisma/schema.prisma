@@ -51,6 +51,9 @@ model User {
   attachments     TaskAttachment[]
   educations      Education[]
 
+  sentMessages    Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
   @@map("users")
 }
 
@@ -184,4 +187,19 @@ model TaskAttachment {
   user      User     @relation(fields: [userId], references: [id])
 
   @@map("task_attachments")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  content    String
+  createdAt  DateTime @default(now())
+  isRead     Boolean  @default(false)
+
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  @@map("messages")
 }

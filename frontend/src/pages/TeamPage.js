@@ -3,6 +3,7 @@ import AppLayout from '../components/layout/AppLayout';
 import { usersAPI } from '../utils/api';
 import { ROLE_LABELS } from '../context/AuthContext';
 import { useAuth } from '../context/AuthContext';
+import UserDrawer from '../components/UserDrawer';
 
 const DEPT_COLORS = {
   'TI': '#3b82f6', 'Desenvolvimento': '#8b5cf6', 'Design': '#ec4899',
@@ -16,6 +17,7 @@ export default function TeamPage() {
   const [search, setSearch] = useState('');
   const [filterDept, setFilterDept] = useState('');
   const [view, setView] = useState('grid');
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => {
     usersAPI.getAll()
@@ -107,7 +109,7 @@ export default function TeamPage() {
       {view === 'grid' ? (
         filterDept ? (
           <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
-            {filtered.map(u => <MemberCard key={u.id} user={u} />)}
+            {filtered.map(u => <MemberCard key={u.id} user={u} onClick={() => setSelectedUserId(u.id)} />)}
           </div>
         ) : (
           Object.entries(grouped).map(([dept, members]) =>
@@ -119,7 +121,7 @@ export default function TeamPage() {
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>({members.length})</span>
                 </div>
                 <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
-                  {members.map(u => <MemberCard key={u.id} user={u} />)}
+                  {members.map(u => <MemberCard key={u.id} user={u} onClick={() => setSelectedUserId(u.id)} />)}
                 </div>
               </div>
             )
@@ -140,7 +142,7 @@ export default function TeamPage() {
               </thead>
               <tbody>
                 {filtered.map(u => (
-                  <tr key={u.id}>
+                  <tr key={u.id} onClick={() => setSelectedUserId(u.id)} style={{ cursor: 'pointer' }}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div className="avatar">{u.avatar}</div>
@@ -169,13 +171,17 @@ export default function TeamPage() {
           </div>
         </div>
       )}
+
+      {selectedUserId && (
+        <UserDrawer userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
+      )}
     </AppLayout>
   );
 }
 
-function MemberCard({ user }) {
+function MemberCard({ user, onClick }) {
   return (
-    <div className="team-card">
+    <div className="team-card" onClick={onClick} style={{ cursor: 'pointer' }}>
       <div className="avatar lg" style={{ background: user.active ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : 'var(--bg-input)' }}>
         {user.avatar}
       </div>

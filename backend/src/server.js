@@ -4,8 +4,13 @@ const cors = require('cors');
 const { seedDatabase } = require('./config/database');
 const routes = require('./routes');
 const { initCronJobs } = require('./jobs/deadlineNotifications');
+const http = require('http');
+const { initSocket } = require('./socket');
 
 const app = express();
+const server = http.createServer(app);
+initSocket(server);
+
 const PORT = process.env.PORT || 5000;
 
 const path = require('path');
@@ -27,7 +32,7 @@ app.use((err, req, res, next) => {
 
 seedDatabase().then(() => { // trigger restart
   initCronJobs();
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`\n🚀 GIP API rodando em http://localhost:${PORT}`);
     console.log(`\n📋 Usuários de teste:`);
     console.log(`   admin@gip.com  → Admin Plataforma`);
