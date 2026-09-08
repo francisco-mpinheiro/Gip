@@ -4,6 +4,10 @@ import { useAuth, ROLE_LABELS } from "../context/AuthContext";
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const avatarIsImage = user?.avatar && String(user.avatar).startsWith('/uploads/');
+  const avatarInitials = user?.name
+    ? user.name.split(' ').filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase()
+    : '?';
 
   const sections = [
     {
@@ -48,9 +52,13 @@ export default function SettingsPage() {
           >
             <div
               className="avatar xl"
-              style={{ width: 56, height: 56, fontSize: 20 }}
+              style={{ width: 56, height: 56, fontSize: 20, overflow: 'hidden' }}
             >
-              {user?.avatar}
+              {avatarIsImage ? (
+                <img src={user.avatar} alt={user.name || 'Usuário'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ) : (
+                <span>{avatarInitials}</span>
+              )}
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 15 }}>{user?.name}</div>

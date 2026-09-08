@@ -215,4 +215,5 @@ gip/
 - [x] Filtros e busca em todas as páginas
 - [x] Persistência de dados com PostgreSQL e Prisma ORM
 
+---
 

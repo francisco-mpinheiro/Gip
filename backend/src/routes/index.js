@@ -16,6 +16,8 @@ const MANAGER_ROLES = [ROLES.ADMIN_PLATFORM, ROLES.ADMIN_COMPANY, ROLES.MANAGER_
 router.post('/auth/login', authCtrl.login);
 router.post('/auth/register', authCtrl.register);
 router.get('/auth/me', authenticate, authCtrl.me);
+router.post('/auth/forgot-password', authCtrl.forgotPassword);
+router.post('/auth/reset-password', authCtrl.resetPassword);
 
 // ─── USERS ───────────────────────────────────────────────────────────────────
 router.get('/users', authenticate, usersCtrl.getAll);
@@ -33,6 +35,8 @@ router.put('/projects/:id', authenticate, projectsCtrl.update);
 router.delete('/projects/:id', authenticate, authorize(...ADMIN_ROLES), projectsCtrl.delete);
 
 const upload = require('../middleware/upload');
+const profileCtrl = require('../controllers/profileController');
+const educationCtrl = require('../controllers/educationController');
 
 // ─── TASKS ───────────────────────────────────────────────────────────────────
 router.get('/tasks', authenticate, tasksCtrl.getAll);
@@ -54,5 +58,38 @@ router.patch('/notifications/:id/read', authenticate, notificationsCtrl.markAsRe
 // ─── DASHBOARD & PERFORMANCE ─────────────────────────────────────────────────
 router.get('/dashboard', authenticate, dashboardCtrl.getDashboard);
 router.get('/performance', authenticate, dashboardCtrl.getPerformance);
+
+// ─── CHAT ────────────────────────────────────────────────────────────────────
+const chatCtrl = require('../controllers/chatController');
+router.get('/chat/:userId', authenticate, chatCtrl.getHistory);
+
+// ─── PROFILE (usuário autenticado) ───────────────────────────────────────────
+router.get('/user/profile', authenticate, profileCtrl.getProfile);
+router.put('/user/profile', authenticate,
+  upload.create({
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+      cb(null, allowed.includes(file.mimetype));
+    }
+  }).single('avatar'),
+  profileCtrl.updateProfile
+);
+router.post('/user/change-password', authenticate, profileCtrl.changePassword);
+
+// ─── EDUCAÇÕES / FORMAÇÕES ───────────────────────────────────────────────────
+// Listagens e CRUD apenas para usuário logado
+router.get('/user/education', authenticate, educationCtrl.list);
+router.post('/user/education', authenticate,
+	upload.create({
+		limits: { fileSize: 5 * 1024 * 1024 },
+		fileFilter: (req, file, cb) => {
+			const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+			cb(null, allowed.includes(file.mimetype));
+		}
+	}).single('certificate'),
+	educationCtrl.create
+);
+router.delete('/user/education/:id', authenticate, educationCtrl.remove);
 
 module.exports = router;

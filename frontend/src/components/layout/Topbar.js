@@ -39,6 +39,10 @@ export default function Topbar({ title }) {
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
+  const avatarIsImage = user?.avatar && String(user.avatar).startsWith('/uploads/');
+  const avatarInitials = user?.name
+    ? user.name.split(' ').filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase()
+    : '?';
 
   return (
     <header className="topbar">
@@ -70,7 +74,13 @@ export default function Topbar({ title }) {
           onClick={() => navigate('/profile')}
           title="Perfil"
         >
-          <div className="avatar sm">{user?.avatar}</div>
+          <div className="avatar sm" style={{ overflow: 'hidden', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+            {avatarIsImage ? (
+              <img src={user.avatar} alt={user.name || 'Usuário'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            ) : (
+              <span>{avatarInitials}</span>
+            )}
+          </div>
           <span>{user?.name?.split(' ')[0]}</span>
         </button>
       </div>

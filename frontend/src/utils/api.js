@@ -23,6 +23,8 @@ export const authAPI = {
   login: (data) => API.post('/auth/login', data),
   register: (data) => API.post('/auth/register', data),
   me: () => API.get('/auth/me'),
+  forgotPassword: (data) => API.post('/auth/forgot-password', data),
+  resetPassword: (data) => API.post('/auth/reset-password', data),
 };
 
 export const usersAPI = {
@@ -32,6 +34,23 @@ export const usersAPI = {
   update: (id, data) => API.put(`/users/${id}`, data),
   toggleActive: (id) => API.patch(`/users/${id}/toggle`),
   delete: (id) => API.delete(`/users/${id}`),
+};
+
+export const profileAPI = {
+  get: () => API.get('/user/profile'),
+  update: (data) => {
+    if (data instanceof FormData) {
+      return API.put('/user/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+    }
+    return API.put('/user/profile', data);
+  },
+  changePassword: (data) => API.post('/user/change-password', data),
+};
+
+export const educationAPI = {
+  list: () => API.get('/user/education'),
+  create: (formData) => API.post('/user/education', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  remove: (id) => API.delete(`/user/education/${id}`),
 };
 
 export const projectsAPI = {
@@ -70,6 +89,10 @@ export const notificationsAPI = {
   getAll: () => API.get('/notifications'),
   markAsRead: (id) => API.patch(`/notifications/${id}/read`),
   markAllAsRead: () => API.patch('/notifications/read-all'),
+};
+
+export const chatAPI = {
+  getHistory: (userId) => API.get(`/chat/${userId}`),
 };
 
 export default API;

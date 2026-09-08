@@ -15,4 +15,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// factory to create a multer instance with custom options (fileFilter, limits)
 module.exports = upload;
+module.exports.create = (opts = {}) => {
+  const { fileFilter, limits } = opts;
+  return multer({ storage: storage, fileFilter, limits });
+};
