@@ -224,7 +224,7 @@ export default function DashboardPage() {
           )}
           {recentActivities?.map(a => (
             <div key={a.id} className="activity-item">
-              <div className="avatar sm">{a.user?.avatar || '?'}</div>
+              <div className="avatar sm" style={{ overflow: 'hidden' }}>{a.user?.avatar?.startsWith('/uploads/') ? <img src={a.user.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : (a.user?.avatar || '?')}</div>
               <div>
                 <div className="activity-text">
                   <strong>{a.user?.name?.split(' ')[0]}</strong> {a.action}{' '}

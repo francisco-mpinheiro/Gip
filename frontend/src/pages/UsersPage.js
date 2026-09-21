@@ -145,7 +145,7 @@ export default function UsersPage() {
                   <tr key={u.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div className="avatar" style={{ opacity: u.active ? 1 : 0.4 }}>{u.avatar}</div>
+                        <div className="avatar" style={{ opacity: u.active ? 1 : 0.4, overflow: 'hidden' }}>{u.avatar?.startsWith('/uploads/') ? <img src={u.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : u.avatar}</div>
                         <div>
                           <div style={{ fontWeight: 600, fontSize: 13.5 }}>{u.name}</div>
                           {u.cpf && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{u.cpf}</div>}

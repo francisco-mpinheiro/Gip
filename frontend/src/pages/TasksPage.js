@@ -267,7 +267,7 @@ export default function TasksPage() {
                   </div>
                   <div className="kanban-card-footer">
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      {t.assignee && <div className="avatar sm" title={t.assignee.name}>{t.assignee.avatar}</div>}
+                      {t.assignee && <div className="avatar sm" style={{ overflow: 'hidden' }} title={t.assignee.name}>{t.assignee.avatar?.startsWith('/uploads/') ? <img src={t.assignee.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : t.assignee.avatar}</div>}
                       {t.dueDate && (
                         <span className={`kanban-card-date ${t.overdue ? 'overdue' : ''}`}>
                           <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(t.dueDate, { day: '2-digit', month: 'short' })}
@@ -323,7 +323,7 @@ export default function TasksPage() {
                       <td>
                         {t.assignee ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div className="avatar sm">{t.assignee.avatar}</div>
+                            <div className="avatar sm" style={{ overflow: 'hidden' }}>{t.assignee.avatar?.startsWith('/uploads/') ? <img src={t.assignee.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : t.assignee.avatar}</div>
                             <span style={{ fontSize: 12.5 }}>{t.assignee.name.split(' ')[0]}</span>
                           </div>
                         ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
@@ -470,7 +470,7 @@ export default function TasksPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {viewingTask.assignee ? (
                       <>
-                        <div className="avatar sm">{viewingTask.assignee.avatar}</div>
+                        <div className="avatar sm" style={{ overflow: 'hidden' }}>{viewingTask.assignee.avatar?.startsWith('/uploads/') ? <img src={viewingTask.assignee.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : viewingTask.assignee.avatar}</div>
                         <span style={{ fontSize: 13.5, fontWeight: 500 }}>{viewingTask.assignee.name}</span>
                       </>
                     ) : (
@@ -560,7 +560,7 @@ export default function TasksPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxHeight: 300, overflowY: 'auto', paddingRight: 4 }}>
                     {comments.map(c => (
                       <div key={c.id} style={{ display: 'flex', gap: 12 }}>
-                        <div className="avatar sm" title={c.user?.name}>{c.user?.avatar || c.user?.name[0]}</div>
+                        <div className="avatar sm" style={{ overflow: 'hidden' }} title={c.user?.name}>{c.user?.avatar?.startsWith('/uploads/') ? <img src={c.user.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : (c.user?.avatar || c.user?.name?.[0])}</div>
                         <div style={{ flex: 1, background: 'var(--bg-input)', padding: '12px 16px', borderRadius: '0 12px 12px 12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                             <span style={{ fontSize: 13, fontWeight: 600 }}>{c.user?.name}</span>

@@ -228,8 +228,8 @@ export default function PerformancePage() {
                     </div>
 
                     {/* avatar */}
-                    <div className="avatar" style={{ flexShrink: 0 }}>
-                      {item.user.avatar}
+                    <div className="avatar" style={{ flexShrink: 0, overflow: 'hidden' }}>
+                      {item.user.avatar?.startsWith('/uploads/') ? <img src={item.user.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : item.user.avatar}
                     </div>
 
                     {/* info */}
@@ -385,7 +385,7 @@ export default function PerformancePage() {
                               gap: 10,
                             }}
                           >
-                            <div className="avatar">{item.user.avatar}</div>
+                            <div className="avatar" style={{ overflow: 'hidden' }}>{item.user.avatar?.startsWith('/uploads/') ? <img src={item.user.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : item.user.avatar}</div>
                             <div>
                               <div
                                 style={{
@@ -556,9 +556,9 @@ function MyPerformanceCard({ data }) {
       >
         <div
           className="avatar xl"
-          style={{ width: 56, height: 56, fontSize: 20 }}
+          style={{ width: 56, height: 56, fontSize: 20, overflow: 'hidden' }}
         >
-          {data.user.avatar}
+          {data.user.avatar?.startsWith('/uploads/') ? <img src={data.user.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : data.user.avatar}
         </div>
         <div>
           <div style={{ fontSize: 17, fontWeight: 800 }}>{data.user.name}</div>

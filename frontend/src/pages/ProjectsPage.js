@@ -167,7 +167,7 @@ export default function ProjectsPage() {
                 <div className="project-card-footer">
                   <div className="project-members">
                     {memberAvatars.map(u => (
-                      <div key={u.id} className="avatar sm" title={u.name}>{u.avatar}</div>
+                      <div key={u.id} className="avatar sm" style={{ overflow: 'hidden' }} title={u.name}>{u.avatar?.startsWith('/uploads/') ? <img src={u.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : u.avatar}</div>
                     ))}
                     {p.memberCount > 4 && (
                       <div className="avatar sm" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', fontSize: 10 }}>+{p.memberCount - 4}</div>
@@ -252,7 +252,7 @@ export default function ProjectsPage() {
                     {users.filter(u => u.active).map(u => (
                       <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '4px 8px', borderRadius: 5, background: form.members.includes(u.id) ? 'var(--accent-blue-dim)' : 'transparent', border: `1px solid ${form.members.includes(u.id) ? 'var(--accent-blue)' : 'transparent'}`, transition: 'all 0.15s' }}>
                         <input type="checkbox" checked={form.members.includes(u.id)} onChange={() => toggleMember(u.id)} style={{ display: 'none' }} />
-                        <div className="avatar sm">{u.avatar}</div>
+                        <div className="avatar sm" style={{ overflow: 'hidden' }}>{u.avatar?.startsWith('/uploads/') ? <img src={u.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : u.avatar}</div>
                         <span style={{ fontSize: 12, color: form.members.includes(u.id) ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{u.name.split(' ')[0]}</span>
                       </label>
                     ))}

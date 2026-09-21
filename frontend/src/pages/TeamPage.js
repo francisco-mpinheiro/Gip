@@ -145,7 +145,7 @@ export default function TeamPage() {
                   <tr key={u.id} onClick={() => setSelectedUserId(u.id)} style={{ cursor: 'pointer' }}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div className="avatar">{u.avatar}</div>
+                        <div className="avatar" style={{ overflow: 'hidden' }}>{u.avatar?.startsWith('/uploads/') ? <img src={u.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : u.avatar}</div>
                         <span style={{ fontWeight: 600 }}>{u.name}</span>
                       </div>
                     </td>
@@ -182,8 +182,8 @@ export default function TeamPage() {
 function MemberCard({ user, onClick }) {
   return (
     <div className="team-card" onClick={onClick} style={{ cursor: 'pointer' }}>
-      <div className="avatar lg" style={{ background: user.active ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : 'var(--bg-input)' }}>
-        {user.avatar}
+      <div className="avatar lg" style={{ overflow: 'hidden', background: user.active ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : 'var(--bg-input)' }}>
+        {user.avatar?.startsWith('/uploads/') ? <img src={user.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : user.avatar}
       </div>
       <div className="team-info">
         <div className="team-name">{user.name}</div>

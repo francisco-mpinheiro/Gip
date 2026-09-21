@@ -4,7 +4,7 @@ import { usePreferences } from '../../context/PreferencesContext';
 import { useNavigate } from 'react-router-dom';
 import { notificationsAPI } from '../../utils/api';
 
-export default function Topbar({ title }) {
+export default function Topbar({ title, onMenuClick }) {
   const { user } = useAuth();
   const { theme, fontSize, toggleTheme, changeFontSize } = usePreferences();
   const navigate = useNavigate();
@@ -46,6 +46,11 @@ export default function Topbar({ title }) {
 
   return (
     <header className="topbar">
+      <div className="topbar-left" style={{ display: 'flex', alignItems: 'center' }}>
+        <button className="topbar-menu-btn mobile-only" onClick={onMenuClick}>
+          <span className="material-symbols-outlined">menu</span>
+        </button>
+      </div>
 
       <div className="topbar-right">
         <button 

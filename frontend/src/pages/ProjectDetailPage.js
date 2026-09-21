@@ -190,7 +190,7 @@ export default function ProjectDetailPage() {
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginRight: 4 }}>Equipe:</div>
             <div className="project-members">
               {members.slice(0, 6).map(m => (
-                <div key={m.id} className="avatar sm" title={m.name}>{m.avatar}</div>
+                <div key={m.id} className="avatar sm" style={{ overflow: 'hidden' }} title={m.name}>{m.avatar?.startsWith('/uploads/') ? <img src={m.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : m.avatar}</div>
               ))}
               {members.length > 6 && (
                 <div className="avatar sm" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', fontSize: 10 }}>+{members.length - 6}</div>
@@ -253,7 +253,7 @@ export default function ProjectDetailPage() {
                     <div className="kanban-card-footer">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         {assignee && (
-                          <div className="avatar sm" title={assignee.name}>{assignee.avatar}</div>
+                          <div className="avatar sm" style={{ overflow: 'hidden' }} title={assignee.name}>{assignee.avatar?.startsWith('/uploads/') ? <img src={assignee.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : assignee.avatar}</div>
                         )}
                         {task.dueDate && (
                           <span className={`kanban-card-date ${overdue ? 'overdue' : ''}`}>
