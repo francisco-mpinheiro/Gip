@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { authAPI } from "../utils/api";
 
 const FEATURES = [
   {
@@ -31,39 +32,72 @@ const FEATURES = [
 ];
 
 const DEMO_USERS = [
-  { label: "Admin Plataforma", email: "admin@taskflow.com", color: "#ef4444" },
-  { label: "Admin Empresa", email: "carlos@empresa.com", color: "#f59e0b" },
-  { label: "Gestora de Área", email: "ana@empresa.com", color: "#8b5cf6" },
-  { label: "Gerente Projeto", email: "bruno@empresa.com", color: "#3b82f6" },
-  { label: "Funcionária", email: "lucia@empresa.com", color: "#22c55e" },
+  {
+    label: "Admin Plataforma",
+    email: "admin@taskflow.com",
+    color: "#ef4444",
+  },
+  {
+    label: "Admin Empresa",
+    email: "carlos@empresa.com",
+    color: "#f59e0b",
+  },
+  {
+    label: "Gestora de Área",
+    email: "ana@empresa.com",
+    color: "#8b5cf6",
+  },
+  {
+    label: "Gerente Projeto",
+    email: "bruno@empresa.com",
+    color: "#3b82f6",
+  },
+  {
+    label: "Funcionária",
+    email: "lucia@empresa.com",
+    color: "#22c55e",
+  },
 ];
 
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+
   const [mode, setMode] = useState("login");
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
   const [showPass, setShow] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoad] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     setError("");
     setLoad(true);
+
     try {
       await login(form.email, form.password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Credenciais inválidas");
+      setError(
+        err.response?.data?.message || "Credenciais inválidas"
+      );
     } finally {
       setLoad(false);
     }
   };
 
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setError("");
+  };
+
   return (
     <div style={css.page}>
-      {/* ══ LEFT ══════════════════════════════════════════════════════════ */}
+      {/* LEFT */}
       <div style={css.left}>
         <div style={css.leftGlow} />
 
@@ -75,26 +109,28 @@ export default function LoginPage() {
                 width="16"
                 height="16"
                 fill="currentColor"
-                class="bi bi-person-workspace"
+                className="bi bi-person-workspace"
                 viewBox="0 0 16 16"
               >
                 <path d="M4 16s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-5.95a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
-                <path d="M2 1a2 2 0 0 0-2 2v9.5A1.5 1.5 0 0 0 1.5 14h.653a5.4 5.4 0 0 1 1.066-2H1V3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9h-2.219c.554.654.89 1.373 1.066 2h.653a1.5 1.5 0 0 0 1.5-1.5V3a2 2 0 0 0-2-2z" />
+                <path d="M2 1a2 2 0 0 0-2 2v9.5A1.5 1.5 0 0 0 1.5 14h.653a5.4 5.4 0 0 1 1.066-2H1V3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9h-2.219c.554.654.89 1.373 1.066 2h.653a1.5 1.5 0 0 1 1.5-1.5V3a2 2 0 0 0-2-2z" />
               </svg>
             </div>
+
             <span style={css.logoText}>GIP</span>
           </div>
 
           <h1 style={css.headline}>
-            Transforme a<br />
+            Transforme a
+            <br />
             <span style={{ color: "#3b82f6" }}>gestão</span> da
             <br />
             sua equipe
           </h1>
 
           <p style={css.desc}>
-            Centralize projetos, otimize processos e aumente a produtividade com
-            controle total, visibilidade e resultados mensuráveis.
+            Centralize projetos, otimize processos e aumente a produtividade
+            com controle total, visibilidade e resultados mensuráveis.
           </p>
 
           <div style={css.features}>
@@ -114,7 +150,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ══ RIGHT ═════════════════════════════════════════════════════════ */}
+      {/* RIGHT */}
       <div style={css.right}>
         <div style={css.card}>
           {/* Icon */}
@@ -127,39 +163,54 @@ export default function LoginPage() {
           >
             <div style={css.cardIcon}>
               <i
-                className={`bi ${mode === "login" ? "bi-box-arrow-in-right" : "bi-person-plus"
-                  }`}
+                className={`bi ${
+                  mode === "login"
+                    ? "bi-box-arrow-in-right"
+                    : mode === "register"
+                      ? "bi-person-plus"
+                      : "bi-key"
+                }`}
               ></i>
             </div>
           </div>
 
           <h2 style={css.cardTitle}>
-            {mode === "login" ? "Bem-vindo" : "Criar Conta"}
+            {mode === "login"
+              ? "Bem-vindo"
+              : mode === "register"
+                ? "Criar Conta"
+                : "Recuperar Senha"}
           </h2>
+
           <p style={css.cardSub}>
             {mode === "login"
               ? "Entre na sua conta para continuar"
-              : "Junte-se ao GIP hoje"}
+              : mode === "register"
+                ? "Junte-se ao GIP hoje"
+                : "Informe seu email para receber o link"}
           </p>
 
           {/* Tabs */}
-          <div style={css.tabs}>
-            {[
-              ["login", "Entrar"],
-              ["register", "Cadastrar"],
-            ].map(([m, l]) => (
-              <button
-                key={m}
-                style={{ ...css.tab, ...(mode === m ? css.tabOn : {}) }}
-                onClick={() => {
-                  setMode(m);
-                  setError("");
-                }}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
+          {mode !== "forgot" && (
+            <div style={css.tabs}>
+              {[
+                ["login", "Entrar"],
+                ["register", "Cadastrar"],
+              ].map(([m, l]) => (
+                <button
+                  key={m}
+                  type="button"
+                  style={{
+                    ...css.tab,
+                    ...(mode === m ? css.tabOn : {}),
+                  }}
+                  onClick={() => handleModeChange(m)}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          )}
 
           {error && <div style={css.errBox}>⚠ {error}</div>}
 
@@ -168,15 +219,20 @@ export default function LoginPage() {
               <form onSubmit={handleLogin}>
                 <div style={css.fieldGroup}>
                   <label style={css.label}>Email ou CPF</label>
+
                   <div style={css.inputWrap}>
                     <span style={css.inputIcon}>✉</span>
+
                     <input
                       style={css.input}
                       type="text"
                       placeholder="seu@email.com ou CPF"
                       value={form.email}
                       onChange={(e) =>
-                        setForm((p) => ({ ...p, email: e.target.value }))
+                        setForm((p) => ({
+                          ...p,
+                          email: e.target.value,
+                        }))
                       }
                       required
                     />
@@ -185,28 +241,42 @@ export default function LoginPage() {
 
                 <div style={css.fieldGroup}>
                   <label style={css.label}>Senha</label>
+
                   <div style={css.inputWrap}>
                     <span style={css.inputIcon}>
                       <i className="bi bi-lock"></i>
                     </span>
+
                     <input
                       style={css.input}
                       type={showPass ? "text" : "password"}
                       placeholder="••••••••"
                       value={form.password}
                       onChange={(e) =>
-                        setForm((p) => ({ ...p, password: e.target.value }))
+                        setForm((p) => ({
+                          ...p,
+                          password: e.target.value,
+                        }))
                       }
                       required
                     />
+
                     <button
                       type="button"
                       style={css.eyeBtn}
                       onClick={() => setShow((v) => !v)}
-                      aria-label={showPass ? "Ocultar senha" : "Mostrar senha"}
+                      aria-label={
+                        showPass
+                          ? "Ocultar senha"
+                          : "Mostrar senha"
+                      }
                     >
                       <i
-                        className={`bi ${showPass ? "bi-eye-slash" : "bi-eye"}`}
+                        className={`bi ${
+                          showPass
+                            ? "bi-eye-slash"
+                            : "bi-eye"
+                        }`}
                       ></i>
                     </button>
                   </div>
@@ -214,13 +284,30 @@ export default function LoginPage() {
 
                 <div style={css.remRow}>
                   <label style={css.remLabel}>
-                    <input type="checkbox" style={{ marginRight: 6 }} />
+                    <input
+                      type="checkbox"
+                      style={{ marginRight: 6 }}
+                    />
                     Lembrar de mim
                   </label>
-                  <span style={css.forgot}>Esqueceu a senha?</span>
+
+                  <button
+                    type="button"
+                    style={css.forgot}
+                    onClick={() => {
+                      setMode("forgot");
+                      setError("");
+                    }}
+                  >
+                    Esqueceu a senha?
+                  </button>
                 </div>
 
-                <button style={css.submitBtn} type="submit" disabled={loading}>
+                <button
+                  style={css.submitBtn}
+                  type="submit"
+                  disabled={loading}
+                >
                   {loading ? "Entrando..." : "Entrar"}
                 </button>
               </form>
@@ -229,7 +316,7 @@ export default function LoginPage() {
                 Não tem conta?{" "}
                 <span
                   style={css.switchLink}
-                  onClick={() => setMode("register")}
+                  onClick={() => handleModeChange("register")}
                 >
                   Criar conta grátis
                 </span>
@@ -237,25 +324,52 @@ export default function LoginPage() {
 
               {/* Demo */}
               <div style={css.demo}>
-                <div style={css.demoHead}>🧪 Acesso rápido — demo</div>
+                <div style={css.demoHead}>
+                  🧪 Acesso rápido — demo
+                </div>
+
                 {DEMO_USERS.map((u) => (
                   <button
                     key={u.email}
-                    onClick={() => setForm({ email: u.email, password: '123456' })}
+                    type="button"
+                    onClick={() =>
+                      setForm({
+                        email: u.email,
+                        password: "123456",
+                      })
+                    }
                     style={css.demoBtn}
                   >
-                    <span style={{ ...css.demoDot, background: u.color }} />
-                    <span style={css.demoRole}>{u.label}</span>
-                    <span style={css.demoEmail}>{u.email}</span>
+                    <span
+                      style={{
+                        ...css.demoDot,
+                        background: u.color,
+                      }}
+                    />
+
+                    <span style={css.demoRole}>
+                      {u.label}
+                    </span>
+
+                    <span style={css.demoEmail}>
+                      {u.email}
+                    </span>
                   </button>
                 ))}
-                <div style={css.demoNote}>Senha: 123456 para todos</div>
+
+                <div style={css.demoNote}>
+                  Senha: 123456 para todos
+                </div>
               </div>
             </>
-          ) : (
+          ) : mode === "register" ? (
             <RegisterForm
               onSuccess={() => navigate("/dashboard")}
-              onBack={() => setMode("login")}
+              onBack={() => handleModeChange("login")}
+            />
+          ) : (
+            <ForgotPassword
+              onBack={() => handleModeChange("login")}
             />
           )}
         </div>
@@ -265,35 +379,74 @@ export default function LoginPage() {
 }
 
 function ForgotPassword({ onBack }) {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState('');
-  const [err, setErr] = useState('');
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
 
   const handle = async (e) => {
-    e.preventDefault(); setErr(''); setMsg(''); setLoading(true);
+    e.preventDefault();
+
+    setErr("");
+    setMsg("");
+    setLoading(true);
+
     try {
-      await fetch('/api/auth/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-      setMsg('Se o email existir, um link foi enviado (verifique logs em dev)');
-    } catch (e) { setErr('Erro ao processar'); }
-    setLoading(false);
+      await authAPI.forgotPassword({ email });
+
+      setMsg(
+        "Se o email estiver cadastrado, um link de redefinição será enviado."
+      );
+    } catch (e) {
+      setErr("Erro ao processar a solicitação");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
       {err && <div style={css.errBox}>⚠ {err}</div>}
-      {msg && <div style={{ background: '#eef', padding: 8, borderRadius: 6 }}>{msg}</div>}
+
+      {msg && (
+        <div style={css.successBox}>
+          {msg}
+        </div>
+      )}
+
       <form onSubmit={handle} style={{ marginTop: 12 }}>
         <div style={css.fieldGroup}>
           <label style={css.label}>Email</label>
+
           <div style={css.inputWrap}>
-            <input style={css.input} type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input
+              style={css.input}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              required
+            />
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn" type="button" onClick={onBack}>Voltar</button>
-          <button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Enviando...' : 'Enviar link'}</button>
-        </div>
+
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={loading}
+          style={{ width: "100%", marginBottom: 10 }}
+        >
+          {loading ? "Enviando..." : "Enviar link"}
+        </button>
+
+        <button
+          className="btn"
+          type="button"
+          onClick={onBack}
+          style={{ width: "100%" }}
+        >
+          Voltar para o login
+        </button>
       </form>
     </div>
   );
@@ -301,6 +454,7 @@ function ForgotPassword({ onBack }) {
 
 function RegisterForm({ onSuccess, onBack }) {
   const { register } = useAuth();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -309,51 +463,78 @@ function RegisterForm({ onSuccess, onBack }) {
     cpf: "",
     department: "Geral",
   });
+
   const [showPass, setShow] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoad] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (form.password !== form.confirmPassword) {
       setError("As senhas não coincidem");
       return;
     }
+
+    if (form.password.length < 6) {
+      setError("A senha deve ter ao menos 6 caracteres");
+      return;
+    }
+
     setError("");
     setLoad(true);
+
     try {
       await register(form);
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || "Erro ao criar conta");
+      setError(
+        err.response?.data?.message || "Erro ao criar conta"
+      );
     } finally {
       setLoad(false);
     }
   };
 
-  const f = (label, key, type, placeholder, required = true) => (
+  const f = (
+    label,
+    key,
+    type,
+    placeholder,
+    required = true
+  ) => (
     <div style={css.fieldGroup} key={key}>
       <label style={css.label}>{label}</label>
 
       <div style={css.inputWrap}>
         <span style={css.inputIcon}>
           <i
-            className={`bi ${type === "password"
+            className={`bi ${
+              type === "password"
                 ? "bi-lock"
                 : type === "email"
                   ? "bi-envelope"
                   : "bi-person"
-              }`}
+            }`}
           ></i>
         </span>
 
         <input
           style={css.input}
-          type={type === "password" ? (showPass ? "text" : "password") : type}
+          type={
+            type === "password"
+              ? showPass
+                ? "text"
+                : "password"
+              : type
+          }
           placeholder={placeholder}
           value={form[key]}
           onChange={(e) =>
-            setForm((p) => ({ ...p, [key]: e.target.value }))
+            setForm((p) => ({
+              ...p,
+              [key]: e.target.value,
+            }))
           }
           required={required}
         />
@@ -363,9 +544,19 @@ function RegisterForm({ onSuccess, onBack }) {
             type="button"
             style={css.eyeBtn}
             onClick={() => setShow((v) => !v)}
-            aria-label={showPass ? "Ocultar senha" : "Mostrar senha"}
+            aria-label={
+              showPass
+                ? "Ocultar senha"
+                : "Mostrar senha"
+            }
           >
-            <i className={`bi ${showPass ? "bi-eye-slash" : "bi-eye"}`}></i>
+            <i
+              className={`bi ${
+                showPass
+                  ? "bi-eye-slash"
+                  : "bi-eye"
+              }`}
+            ></i>
           </button>
         )}
       </div>
@@ -375,22 +566,81 @@ function RegisterForm({ onSuccess, onBack }) {
   return (
     <form onSubmit={handleSubmit}>
       {error && <div style={css.errBox}>⚠ {error}</div>}
-      {f("Nome completo", "name", "text", "Seu nome")}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {f("Email", "email", "email", "seu@email.com")}
-        {f("CPF", "cpf", "text", "000.000.000-00", false)}
+
+      {f(
+        "Nome completo",
+        "name",
+        "text",
+        "Seu nome"
+      )}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 12,
+        }}
+      >
+        {f(
+          "Email",
+          "email",
+          "email",
+          "seu@email.com"
+        )}
+
+        {f(
+          "CPF",
+          "cpf",
+          "text",
+          "000.000.000-00",
+          false
+        )}
       </div>
-      {f("Departamento", "department", "text", "TI, Design, RH...", false)}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {f("Senha", "password", "password", "Mínimo 6 caracteres")}
-        {f("Confirmar senha", "confirmPassword", "password", "Repita a senha")}
+
+      {f(
+        "Departamento",
+        "department",
+        "text",
+        "TI, Design, RH...",
+        false
+      )}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 12,
+        }}
+      >
+        {f(
+          "Senha",
+          "password",
+          "password",
+          "Mínimo 6 caracteres"
+        )}
+
+        {f(
+          "Confirmar senha",
+          "confirmPassword",
+          "password",
+          "Repita a senha"
+        )}
       </div>
-      <button style={css.submitBtn} type="submit" disabled={loading}>
+
+      <button
+        style={css.submitBtn}
+        type="submit"
+        disabled={loading}
+      >
         {loading ? "Criando conta..." : "Criar Conta"}
       </button>
+
       <div style={css.switchLine}>
         Já tem conta?{" "}
-        <span style={css.switchLink} onClick={onBack}>
+        <span
+          style={css.switchLink}
+          onClick={onBack}
+        >
           Entrar agora
         </span>
       </div>
@@ -398,7 +648,8 @@ function RegisterForm({ onSuccess, onBack }) {
   );
 }
 
-/* ═══════════════════════════════ STYLES ═══════════════════════════════════ */
+/* STYLES */
+
 const css = {
   page: {
     display: "flex",
@@ -407,7 +658,6 @@ const css = {
     overflow: "hidden",
   },
 
-  /* LEFT */
   left: {
     flex: "1 1 55%",
     background:
@@ -420,37 +670,58 @@ const css = {
     position: "relative",
     overflow: "hidden",
   },
+
   leftGlow: {
     position: "absolute",
     inset: 0,
     pointerEvents: "none",
-    background: `radial-gradient(ellipse at 15% 25%, rgba(59,130,246,0.14) 0%, transparent 55%),
-                 radial-gradient(ellipse at 85% 75%, rgba(139,92,246,0.09) 0%, transparent 50%),
-                 radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.04) 0%, transparent 70%)`,
+    background: `
+      radial-gradient(
+        ellipse at 15% 25%,
+        rgba(59,130,246,0.14) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse at 85% 75%,
+        rgba(139,92,246,0.09) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse at 50% 50%,
+        rgba(59,130,246,0.04) 0%,
+        transparent 70%
+      )
+    `,
   },
+
   leftContent: {
     width: "100%",
     maxWidth: 620,
     position: "relative",
     zIndex: 1,
   },
+
   logo: {
     display: "flex",
     alignItems: "center",
     gap: 12,
     marginBottom: 44,
   },
+
   logoBox: {
     width: 46,
     height: 46,
-    background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+    background:
+      "linear-gradient(135deg, #3b82f6, #6366f1)",
     borderRadius: 12,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: 20,
-    boxShadow: "0 4px 20px rgba(59,130,246,0.4)",
+    boxShadow:
+      "0 4px 20px rgba(59,130,246,0.4)",
   },
+
   logoText: {
     fontSize: 22,
     fontWeight: 800,
@@ -466,6 +737,7 @@ const css = {
     letterSpacing: "-0.03em",
     marginBottom: 24,
   },
+
   desc: {
     fontSize: 18,
     color: "#94a3b8",
@@ -476,66 +748,99 @@ const css = {
 
   features: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "32px 24px",
     marginBottom: 32,
   },
-  feat: { display: "flex", alignItems: "flex-start", gap: 16 },
+
+  feat: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+
   featIcon: {
     width: 44,
     height: 44,
     flexShrink: 0,
     background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    border:
+      "1px solid rgba(255,255,255,0.08)",
     borderRadius: 12,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: 18,
   },
+
   featTitle: {
     fontSize: 15,
     fontWeight: 700,
     color: "#e2e8f0",
     marginBottom: 2,
   },
-  featDesc: { fontSize: 13.5, color: "#64748b", lineHeight: 1.45 },
 
-  stats: { display: "flex", gap: 32, position: "relative", zIndex: 1 },
+  featDesc: {
+    fontSize: 13.5,
+    color: "#64748b",
+    lineHeight: 1.45,
+  },
+
+  stats: {
+    display: "flex",
+    gap: 32,
+    position: "relative",
+    zIndex: 1,
+  },
+
   stat: {},
+
   statVal: {
     fontSize: 26,
     fontWeight: 800,
     color: "#f1f5f9",
     letterSpacing: "-0.02em",
   },
-  statLabel: { fontSize: 11.5, color: "#64748b", marginTop: 2 },
 
-  /* RIGHT */
+  statLabel: {
+    fontSize: 11.5,
+    color: "#64748b",
+    marginTop: 2,
+  },
+
   right: {
     flex: "0 0 45%",
     background: "#0a0f1c",
-    borderLeft: "1px solid rgba(255,255,255,0.05)",
+    borderLeft:
+      "1px solid rgba(255,255,255,0.05)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     padding: "28px 36px",
     overflowY: "auto",
   },
-  card: { width: "100%", maxWidth: 400 },
+
+  card: {
+    width: "100%",
+    maxWidth: 400,
+  },
 
   cardIcon: {
     width: 54,
     height: 54,
-    background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+    background:
+      "linear-gradient(135deg, #3b82f6, #6366f1)",
     borderRadius: 14,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: 22,
     color: "#fff",
-    boxShadow: "0 8px 28px rgba(59,130,246,0.35)",
+    boxShadow:
+      "0 8px 28px rgba(59,130,246,0.35)",
   },
+
   cardTitle: {
     fontSize: 22,
     fontWeight: 800,
@@ -544,6 +849,7 @@ const css = {
     letterSpacing: "-0.02em",
     marginBottom: 4,
   },
+
   cardSub: {
     fontSize: 13,
     color: "#64748b",
@@ -554,12 +860,14 @@ const css = {
   tabs: {
     display: "flex",
     background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.07)",
+    border:
+      "1px solid rgba(255,255,255,0.07)",
     borderRadius: 10,
     padding: 4,
     gap: 4,
     marginBottom: 18,
   },
+
   tab: {
     flex: 1,
     padding: "8px 10px",
@@ -572,15 +880,18 @@ const css = {
     cursor: "pointer",
     transition: "all 0.18s",
   },
+
   tabOn: {
     background: "#1c2230",
     color: "#f1f5f9",
-    boxShadow: "0 1px 6px rgba(0,0,0,0.5)",
+    boxShadow:
+      "0 1px 6px rgba(0,0,0,0.5)",
   },
 
   errBox: {
     background: "rgba(239,68,68,0.08)",
-    border: "1px solid rgba(239,68,68,0.22)",
+    border:
+      "1px solid rgba(239,68,68,0.22)",
     borderRadius: 8,
     padding: "9px 13px",
     fontSize: 12.5,
@@ -588,7 +899,21 @@ const css = {
     marginBottom: 14,
   },
 
-  fieldGroup: { marginBottom: 12 },
+  successBox: {
+    background: "rgba(34,197,94,0.08)",
+    border:
+      "1px solid rgba(34,197,94,0.22)",
+    borderRadius: 8,
+    padding: "10px 13px",
+    fontSize: 12.5,
+    color: "#4ade80",
+    marginBottom: 14,
+  },
+
+  fieldGroup: {
+    marginBottom: 12,
+  },
+
   label: {
     display: "block",
     fontSize: 12,
@@ -596,7 +921,11 @@ const css = {
     color: "#94a3b8",
     marginBottom: 5,
   },
-  inputWrap: { position: "relative" },
+
+  inputWrap: {
+    position: "relative",
+  },
+
   inputIcon: {
     position: "absolute",
     left: 12,
@@ -606,10 +935,12 @@ const css = {
     color: "#4a5568",
     pointerEvents: "none",
   },
+
   input: {
     width: "100%",
     background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.09)",
+    border:
+      "1px solid rgba(255,255,255,0.09)",
     borderRadius: 9,
     padding: "10px 38px 10px 36px",
     color: "#f1f5f9",
@@ -617,7 +948,9 @@ const css = {
     outline: "none",
     transition: "border-color 0.2s",
     fontFamily: "inherit",
+    boxSizing: "border-box",
   },
+
   eyeBtn: {
     position: "absolute",
     right: 10,
@@ -638,6 +971,7 @@ const css = {
     marginBottom: 16,
     marginTop: 2,
   },
+
   remLabel: {
     display: "flex",
     alignItems: "center",
@@ -645,17 +979,23 @@ const css = {
     color: "#64748b",
     cursor: "pointer",
   },
+
   forgot: {
     fontSize: 12.5,
     color: "#3b82f6",
     fontWeight: 600,
     cursor: "pointer",
+    background: "none",
+    border: "none",
+    padding: 0,
+    fontFamily: "inherit",
   },
 
   submitBtn: {
     width: "100%",
     padding: "11px",
-    background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+    background:
+      "linear-gradient(135deg, #3b82f6, #2563eb)",
     border: "none",
     borderRadius: 9,
     color: "#fff",
@@ -663,7 +1003,8 @@ const css = {
     fontWeight: 700,
     cursor: "pointer",
     transition: "opacity 0.2s",
-    boxShadow: "0 4px 16px rgba(59,130,246,0.3)",
+    boxShadow:
+      "0 4px 16px rgba(59,130,246,0.3)",
     marginBottom: 12,
     fontFamily: "inherit",
   },
@@ -674,15 +1015,22 @@ const css = {
     color: "#64748b",
     marginBottom: 4,
   },
-  switchLink: { color: "#3b82f6", fontWeight: 600, cursor: "pointer" },
+
+  switchLink: {
+    color: "#3b82f6",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
 
   demo: {
     marginTop: 16,
     padding: "12px 14px",
     background: "rgba(59,130,246,0.05)",
-    border: "1px solid rgba(59,130,246,0.12)",
+    border:
+      "1px solid rgba(59,130,246,0.12)",
     borderRadius: 10,
   },
+
   demoHead: {
     fontSize: 10.5,
     fontWeight: 700,
@@ -691,6 +1039,7 @@ const css = {
     textTransform: "uppercase",
     letterSpacing: "0.06em",
   },
+
   demoBtn: {
     width: "100%",
     display: "flex",
@@ -705,8 +1054,30 @@ const css = {
     textAlign: "left",
     fontFamily: "inherit",
   },
-  demoDot: { width: 7, height: 7, borderRadius: "50%", flexShrink: 0 },
-  demoRole: { fontSize: 11.5, color: "#64748b", width: 110, flexShrink: 0 },
-  demoEmail: { fontSize: 11.5, color: "#3b82f6", fontWeight: 500 },
-  demoNote: { fontSize: 10.5, color: "#4a5568", marginTop: 7 },
+
+  demoDot: {
+    width: 7,
+    height: 7,
+    borderRadius: "50%",
+    flexShrink: 0,
+  },
+
+  demoRole: {
+    fontSize: 11.5,
+    color: "#64748b",
+    width: 110,
+    flexShrink: 0,
+  },
+
+  demoEmail: {
+    fontSize: 11.5,
+    color: "#3b82f6",
+    fontWeight: 500,
+  },
+
+  demoNote: {
+    fontSize: 10.5,
+    color: "#4a5568",
+    marginTop: 7,
+  },
 };

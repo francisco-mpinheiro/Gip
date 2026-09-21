@@ -18,49 +18,139 @@ const sanitizeUser = (user) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ message: 'Email é obrigatório' });
-    const user = await prisma.user.findFirst({ where: { email } });
-    if (!user) return res.status(200).json({ message: 'Se o email existir, um link será enviado' }); // don't reveal
 
-    const token = require('crypto').randomBytes(20).toString('hex');
-    const expiry = new Date(Date.now() + 1000 * 60 * 60); // 1h
+    if (!email) {
+      return res.status(400).json({
+        message: 'Email é obrigatório'
+      });
+    }
 
-    await prisma.user.update({ where: { id: user.id }, data: { resetToken: token, resetTokenExpiry: expiry } });
+    const user = await prisma.user.findFirst({
+      where: { email }
+    });
 
-    const host = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const resetLink = `${host}/reset-password?token=${token}`;
+    // Não revela se o email está cadastrado.
+    if (!user) {
+      return res.status(200).json({
+        message: 'Se o email existir, um link será enviado'
+      });
+    }
 
-    // If SMTP configured, try to send real email
-    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const token = require('crypto')
+      .randomBytes(20)
+      .toString('hex');
+
+    const expiry = new Date(
+      Date.now() + 1000 * 60 * 60
+    );
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken: token,
+        resetTokenExpiry: expiry
+      }
+    });
+
+    const host =
+      process.env.FRONTEND_URL ||
+      'http://localhost:3000';
+
+    const resetLink =
+      `${host}/reset-password?token=${token}`;
+
+    // Envio de email real caso o SMTP esteja configurado.
+    if (
+      process.env.SMTP_HOST &&
+      process.env.SMTP_USER &&
+      process.env.SMTP_PASS
+    ) {
       try {
         const nodemailer = require('nodemailer');
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: parseInt(process.env.SMTP_PORT || '587', 10),
-          secure: (process.env.SMTP_SECURE === 'true'),
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-        });
 
-        const from = process.env.EMAIL_FROM || process.env.SMTP_USER;
+        const transporter =
+          nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: parseInt(
+              process.env.SMTP_PORT || '587',
+              10
+            ),
+            secure:
+              process.env.SMTP_SECURE === 'true',
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS
+            }
+          });
+
+        const from =
+          process.env.EMAIL_FROM ||
+          process.env.SMTP_USER;
+
         await transporter.sendMail({
           from,
           to: email,
           subject: 'Redefinição de senha - GIP',
-          html: `<p>Olá,</p><p>Recebemos uma solicitação para redefinir sua senha. Clique no link abaixo para prosseguir:</p><p><a href="${resetLink}">${resetLink}</a></p><p>Se você não solicitou, ignore este e-mail.</p>`
+          html: `
+            <p>Olá,</p>
+
+            <p>
+              Recebemos uma solicitação para
+              redefinir sua senha.
+            </p>
+
+            <p>
+              Clique no link abaixo para prosseguir:
+            </p>
+
+            <p>
+              <a href="${resetLink}">
+                ${resetLink}
+              </a>
+            </p>
+
+            <p>
+              Este link é válido por 60 minutos
+              e só pode ser utilizado uma vez.
+            </p>
+
+            <p>
+              Se você não solicitou a redefinição,
+              ignore este e-mail.
+            </p>
+          `
         });
       } catch (sendErr) {
-        console.error('Falha ao enviar e-mail SMTP:', sendErr);
-        // fallback to logging in dev
-        if (process.env.NODE_ENV === 'development') console.log(`[DEV] Link de reset de senha para ${email}: ${resetLink}`);
+        console.error(
+          'Falha ao enviar e-mail SMTP:',
+          sendErr
+        );
+
+        // Em desenvolvimento, mostra o link no console.
+        if (process.env.NODE_ENV === 'development') {
+          console.log(
+            `[DEV] Link de reset de senha para ${email}: ${resetLink}`
+          );
+        }
       }
     } else {
-      if (process.env.NODE_ENV === 'development') console.log(`[DEV] Link de reset de senha para ${email}: ${resetLink}`);
+      // Sem SMTP configurado, mostra o link apenas em desenvolvimento.
+      if (process.env.NODE_ENV === 'development') {
+        console.log(
+          `[DEV] Link de reset de senha para ${email}: ${resetLink}`
+        );
+      }
     }
 
-    res.json({ message: 'Se o email existir, um link será enviado' });
+    return res.status(200).json({
+      message: 'Se o email existir, um link será enviado'
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Erro interno' });
+
+    return res.status(500).json({
+      message: 'Erro interno'
+    });
   }
 };
 
@@ -68,19 +158,64 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
-    if (!token || !newPassword) return res.status(400).json({ message: 'Token e nova senha são obrigatórios' });
 
-    const user = await prisma.user.findFirst({ where: { resetToken: token } });
-    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
-      return res.status(400).json({ message: 'Token inválido ou expirado' });
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        message:
+          'Token e nova senha são obrigatórios'
+      });
     }
 
-    const hashed = await bcrypt.hash(newPassword, 10);
-    await prisma.user.update({ where: { id: user.id }, data: { password: hashed, resetToken: null, resetTokenExpiry: null } });
-    res.json({ message: 'Senha redefinida com sucesso' });
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token
+      }
+    });
+
+    // Token inexistente ou expirado.
+    if (
+      !user ||
+      !user.resetTokenExpiry ||
+      user.resetTokenExpiry < new Date()
+    ) {
+      return res.status(400).json({
+        message: 'Token inválido ou expirado'
+      });
+    }
+
+    // Regra mínima de senha do sistema.
+    if (
+      typeof newPassword !== 'string' ||
+      newPassword.length < 6
+    ) {
+      return res.status(400).json({
+        message:
+          'A nova senha deve ter ao menos 6 caracteres'
+      });
+    }
+
+    const hashed =
+      await bcrypt.hash(newPassword, 10);
+
+    // Invalida o token imediatamente após o uso.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashed,
+        resetToken: null,
+        resetTokenExpiry: null
+      }
+    });
+
+    return res.json({
+      message: 'Senha redefinida com sucesso'
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Erro interno' });
+
+    return res.status(500).json({
+      message: 'Erro interno'
+    });
   }
 };
 
@@ -88,8 +223,11 @@ exports.resetPassword = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email e senha são obrigatórios' });
+      return res.status(400).json({
+        message: 'Email e senha são obrigatórios'
+      });
     }
 
     const user = await prisma.user.findFirst({
@@ -98,55 +236,111 @@ exports.login = async (req, res) => {
       }
     });
 
-    if (!user) return res.status(401).json({ message: 'Credenciais inválidas' });
-    if (!user.active) return res.status(401).json({ message: 'Usuário desativado. Contate o administrador.' });
+    if (!user) {
+      return res.status(401).json({
+        message: 'Credenciais inválidas'
+      });
+    }
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(401).json({ message: 'Credenciais inválidas' });
+    if (!user.active) {
+      return res.status(401).json({
+        message:
+          'Usuário desativado. Contate o administrador.'
+      });
+    }
+
+    const valid =
+      await bcrypt.compare(password, user.password);
+
+    if (!valid) {
+      return res.status(401).json({
+        message: 'Credenciais inválidas'
+      });
+    }
 
     const token = generateToken(user);
-    res.json({ token, user: sanitizeUser(user) });
+
+    return res.json({
+      token,
+      user: sanitizeUser(user)
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Erro interno do servidor' });
+    return res.status(500).json({
+      message: 'Erro interno do servidor'
+    });
   }
 };
 
 // POST /api/auth/register
 exports.register = async (req, res) => {
   try {
-    const { name, email, cpf, password, role, department } = req.body;
+    const {
+      name,
+      email,
+      cpf,
+      password,
+      role,
+      department
+    } = req.body;
+
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Nome, email e senha são obrigatórios' });
+      return res.status(400).json({
+        message:
+          'Nome, email e senha são obrigatórios'
+      });
     }
 
-    const exists = await prisma.user.findFirst({
-      where: {
-        OR: [{ email }, { cpf: cpf || '' }]
-      }
+    const exists =
+      await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email },
+            { cpf: cpf || '' }
+          ]
+        }
+      });
+
+    if (exists) {
+      return res.status(400).json({
+        message: 'Email ou CPF já cadastrado'
+      });
+    }
+
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
+
+    const initials = name
+      .split(' ')
+      .map(n => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+
+    const newUser =
+      await prisma.user.create({
+        data: {
+          name,
+          email,
+          cpf: cpf || '',
+          password: hashedPassword,
+          role: role || ROLES.EMPLOYEE,
+          department: department || 'Geral',
+          avatar: initials,
+          active: true
+        }
+      });
+
+    const token =
+      generateToken(newUser);
+
+    return res.status(201).json({
+      token,
+      user: sanitizeUser(newUser)
     });
-
-    if (exists) return res.status(400).json({ message: 'Email ou CPF já cadastrado' });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const initials = name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-
-    const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        cpf: cpf || '',
-        password: hashedPassword,
-        role: role || ROLES.EMPLOYEE,
-        department: department || 'Geral',
-        avatar: initials,
-        active: true,
-      }
-    });
-
-    const token = generateToken(newUser);
-    res.status(201).json({ token, user: sanitizeUser(newUser) });
   } catch (err) {
-    res.status(500).json({ message: 'Erro interno do servidor' });
+    return res.status(500).json({
+      message: 'Erro interno do servidor'
+    });
   }
 };
 
