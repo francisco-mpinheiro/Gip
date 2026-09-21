@@ -62,9 +62,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={css.page}>
+    <div className="login-page" style={css.page}>
       {/* ══ LEFT ══════════════════════════════════════════════════════════ */}
-      <div style={css.left}>
+      <div className="login-panel login-panel-left" style={css.left}>
         <div style={css.leftGlow} />
 
         <div style={css.leftContent}>
@@ -115,8 +115,8 @@ export default function LoginPage() {
       </div>
 
       {/* ══ RIGHT ═════════════════════════════════════════════════════════ */}
-      <div style={css.right}>
-        <div style={css.card}>
+      <div className="login-panel login-panel-right" style={css.right}>
+        <div className="login-card" style={css.card}>
           {/* Icon */}
           <div
             style={{
@@ -376,12 +376,12 @@ function RegisterForm({ onSuccess, onBack }) {
     <form onSubmit={handleSubmit}>
       {error && <div style={css.errBox}>⚠ {error}</div>}
       {f("Nome completo", "name", "text", "Seu nome")}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div className="login-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {f("Email", "email", "email", "seu@email.com")}
         {f("CPF", "cpf", "text", "000.000.000-00", false)}
       </div>
       {f("Departamento", "department", "text", "TI, Design, RH...", false)}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div className="login-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {f("Senha", "password", "password", "Mínimo 6 caracteres")}
         {f("Confirmar senha", "confirmPassword", "password", "Repita a senha")}
       </div>

@@ -428,6 +428,7 @@ input, textarea, select { font-family: inherit; }
 .topbar-search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.40); font-size: 13px; }
 
 .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.topbar-title { color: #fff; font-size: 17px; font-weight: 700; white-space: nowrap; }
 
 /* ─── NOTIFICATION BELL ──────────────────────────────────────────────────── */
 .topbar-icon-btn {
@@ -1164,4 +1165,83 @@ tr:last-child td { border-bottom: none; }
   .task-list-title {
     font-size: 13px;
   }
+}
+
+/* ─── RESPONSIVE POLISH ──────────────────────────────────────────────────── */
+html, body, #root { max-width: 100%; overflow-x: hidden; }
+img, svg, video { max-width: 100%; }
+.page-content > * { min-width: 0; }
+.card-header { gap: 12px; flex-wrap: wrap; }
+.card-title, .project-name, .task-title, .activity-text { overflow-wrap: anywhere; }
+.topbar-title { overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 900px) {
+  .mobile-only { display: flex !important; }
+  .page-content { padding: 22px 20px; }
+  .metric-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .profile-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .topbar-search { max-width: 260px; }
+}
+
+@media (max-width: 640px) {
+  html { font-size: 16px; }
+  .page-content { padding: 16px 12px 24px; }
+  .topbar { height: 60px; padding: 0 12px; gap: 8px; }
+  .topbar-title { font-size: 15px; }
+  .topbar-search { display: none; }
+  .topbar-right { gap: 4px; }
+  .topbar-icon-btn { width: 36px; height: 36px; padding: 6px; }
+  .topbar-user { padding-right: 5px; }
+  .topbar-user > span:last-child { display: none; }
+  .page-header { margin-bottom: 18px; }
+  .page-header h1 { font-size: 24px; }
+  .page-header p { font-size: 13px; }
+  .metric-cards, .grid-3, .projects-grid { grid-template-columns: 1fr; }
+  .metric-card, .card { padding: 16px; }
+  .metric-value { font-size: 28px; }
+  .flex-between { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .filter-bar { align-items: stretch; }
+  .filter-search, .filter-select, .filter-bar > .btn { min-width: 100%; max-width: none; }
+  .btn { justify-content: center; }
+  .modal-overlay { padding: 10px; align-items: flex-end; }
+  .modal { max-height: 94vh; border-radius: 14px 14px 0 0; }
+  .modal-header { padding: 16px 16px 0; }
+  .modal-body { padding: 0 16px 16px; }
+  .modal-footer { flex-direction: column-reverse; }
+  .modal-footer .btn { width: 100%; }
+  .form-row, .login-form-row { grid-template-columns: 1fr !important; gap: 0 !important; }
+  .table-container { margin: 0 -16px; padding: 0 16px; }
+  table { min-width: 700px; }
+  .kanban-board { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 8px; scroll-snap-type: x proximity; }
+  .kanban-col { min-width: min(88vw, 340px); scroll-snap-align: start; }
+  .task-list-actions { opacity: 1; }
+  .settings-dropdown { top: 56px; right: 8px; left: 8px; width: auto !important; max-height: calc(100vh - 68px); overflow-y: auto; }
+  .settings-dropdown[style] { right: 8px !important; width: auto !important; }
+  .drawer { width: 100%; }
+  .drawer-header, .drawer-content { padding: 16px; }
+  .chat-bubble { max-width: 90%; }
+  .profile-grid .card-header { align-items: flex-start; }
+  .profile-grid .card-header > div:last-child { width: 100%; }
+  .profile-grid .card-header .btn { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .sidebar { width: min(84vw, 300px); }
+  .topbar-user { border-color: transparent; background: transparent; }
+  .topbar-user .avatar { width: 30px; height: 30px; }
+  .card-header { align-items: flex-start; }
+  .card-link { margin-left: auto; }
+  .task-item { gap: 8px; }
+  .task-item > .badge { white-space: normal; text-align: right; }
+  .project-meta { gap: 7px; flex-wrap: wrap; }
+  .login-panel-left { display: none !important; }
+  .login-panel-right { flex: 1 1 100% !important; min-height: 100vh; padding: 24px 16px !important; }
+  .login-card { max-width: 430px !important; }
+  .login-page { min-height: 100dvh !important; height: auto !important; overflow: visible !important; }
+  .login-page .remRow { flex-wrap: wrap; gap: 8px; }
+  .login-page .demoRole { width: auto; flex: 1; }
+  .login-page .demoEmail { max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }

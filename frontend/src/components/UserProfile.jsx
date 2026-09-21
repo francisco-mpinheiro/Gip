@@ -160,7 +160,7 @@ export default function UserProfile() {
 
   return (
     <div>
-      <div className="grid-2" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
+      <div className="grid-2 profile-grid" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
         <div>
           <div className="card" style={{ textAlign: 'center', padding: 28 }}>
             <div style={{ position: 'relative', width: 110, height: 110, margin: '0 auto 14px', borderRadius: '50%', overflow: 'hidden', background: 'linear-gradient(135deg,#3b82f6,#6366f1)', border: '3px solid rgba(59,130,246,0.18)', boxShadow: '0 12px 30px rgba(59,130,246,0.18)' }}>
