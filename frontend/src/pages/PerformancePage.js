@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import AppLayout from "../components/layout/AppLayout";
 import { dashboardAPI } from "../utils/api";
 import { useAuth, ROLE_LABELS } from "../context/AuthContext";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 function barColor(rate) {
   if (rate >= 75) return "#22c55e";
@@ -158,6 +159,28 @@ export default function PerformancePage() {
         <MyPerformanceCard data={perf[0]} />
       ) : (
         <>
+          {/* GRÁFICO DE BARRAS: DESEMPENHO DA EQUIPE */}
+          <div className="card" style={{ marginBottom: 20 }}>
+            <div className="card-header">
+              <span className="card-title">Visão Geral da Equipe (Taxa de Conclusão)</span>
+            </div>
+            <div style={{ width: '100%', height: 260, marginTop: 10 }}>
+              <ResponsiveContainer>
+                <BarChart data={sorted.map(u => ({ name: u.user.name.split(' ')[0], Taxa: u.completionRate }))} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    cursor={{ fill: 'var(--bg-primary)' }}
+                    contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                    itemStyle={{ color: 'var(--accent-blue)', fontWeight: 700 }}
+                  />
+                  <Bar dataKey="Taxa" fill="var(--accent-blue)" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
           {/* RANKING */}
           <div className="card" style={{ marginBottom: 20 }}>
             <div className="card-header">

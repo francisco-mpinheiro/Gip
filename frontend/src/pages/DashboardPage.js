@@ -4,6 +4,7 @@ import { formatDateLocal } from '../utils/dateUtils';
 import AppLayout from '../components/layout/AppLayout';
 import { dashboardAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const STATUS_LABEL = { em_progresso: 'Em Progresso', planejamento: 'Planejamento', concluido: 'Concluído', a_fazer: 'A Fazer', em_andamento: 'Em Andamento' };
 const STATUS_CLASS = { em_progresso: 'badge-em_progresso', planejamento: 'badge-planejamento', concluido: 'badge-concluido', a_fazer: 'badge-a_fazer', em_andamento: 'badge-em_andamento', pendente: 'badge-pendente' };
@@ -69,8 +70,23 @@ export default function DashboardPage() {
     <AppLayout>
       <div className="page-header">
         <h1>Dashboard</h1>
-
       </div>
+
+      {/* CHUNKS DE CÁLCULO DE GRÁFICO */}
+      {(() => {
+        const chartData = [
+          { name: 'Concluído', value: 0, color: '#22c55e' },
+          { name: 'Em Andamento', value: 0, color: '#3b82f6' },
+          { name: 'A Fazer', value: 0, color: '#94a3b8' },
+        ];
+        (tasksThisWeek || []).forEach(t => {
+          if (t.status === 'concluido') chartData[0].value++;
+          else if (t.status === 'em_andamento' || t.status === 'em_progresso') chartData[1].value++;
+          else chartData[2].value++;
+        });
+        const filteredChartData = chartData.filter(d => d.value > 0);
+        return (
+          <>
 
       {/* METRIC CARDS */}
       <div className="metric-cards">
@@ -171,7 +187,45 @@ export default function DashboardPage() {
       </div>
 
       {/* ACTIVITY CHART + RECENT ACTIVITY */}
-      <div className="grid-2">
+      <div className="grid-3">
+        {/* CHART DA SEMANA */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="card-header" style={{ marginBottom: 0 }}>
+            <span className="card-title">Status da Semana</span>
+          </div>
+          <div style={{ flex: 1, minHeight: 250, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {filteredChartData.length === 0 ? (
+               <div className="empty-state">
+                 <p>Sem dados suficientes.</p>
+               </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie
+                    data={filteredChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {filteredChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                    itemStyle={{ color: 'var(--text-secondary)' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: 13, color: 'var(--text-secondary)' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
         <div className="card" style={{ maxHeight: '500px', overflowY: 'auto' }}>
           <div className="card-header" style={{ position: 'sticky', top: '-20px', backgroundColor: 'var(--bg-card)', zIndex: 10, padding: '20px 0 15px 0', margin: '-20px 0 0 0', borderBottom: '1px solid var(--border-light)' }}>
             <span className="card-title">Atividades da Semana</span>
@@ -237,6 +291,9 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+          </>
+        );
+      })()}
     </AppLayout>
   );
 }
