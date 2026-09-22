@@ -29,6 +29,7 @@ export default function ProjectDetailPage() {
   const [taskModal, setTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [taskForm, setTaskForm] = useState(emptyTask);
+  const [taskError, setTaskError] = useState("");
   const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(null);
   const [dragOver, setDragOver] = useState(null);
@@ -42,7 +43,7 @@ export default function ProjectDetailPage() {
 
   useEffect(load, [load]);
 
-  const openCreateTask = () => { setEditingTask(null); setTaskForm(emptyTask); setTaskModal(true); };
+  const openCreateTask = () => { setEditingTask(null); setTaskForm(emptyTask); setTaskError(""); setTaskModal(true); };
   const openEditTask = (t) => {
     setEditingTask(t);
     setTaskForm({
@@ -50,12 +51,14 @@ export default function ProjectDetailPage() {
       assigneeId: t.assigneeId || '', priority: t.priority,
       dueDate: t.dueDate ? t.dueDate.slice(0, 10) : '',
     });
+    setTaskError("");
     setTaskModal(true);
   };
 
   const handleSaveTask = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setTaskError("");
     try {
       if (editingTask) {
         await tasksAPI.update(editingTask.id, taskForm);
@@ -65,7 +68,8 @@ export default function ProjectDetailPage() {
       setTaskModal(false);
       load();
     } catch (err) {
-      alert(err.response?.data?.message || 'Erro ao salvar tarefa');
+      setTaskError(err.response?.data?.message || 'Erro ao salvar tarefa');
+      setTimeout(() => setTaskError(""), 4000);
     } finally {
       setSaving(false);
     }
@@ -101,11 +105,18 @@ export default function ProjectDetailPage() {
   const handleGenerateReport = () => {
     const doc = new jsPDF();
 
-    doc.setFontSize(18);
+    // Fundo do PDF baseado na cor --bg-primary do tema escuro (#080f1e)
+    doc.setFillColor(8, 15, 30);
+    doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
+
+    doc.setFontSize(20);
+    doc.setTextColor(232, 240, 254); // --text-primary (#e8f0fe)
+    doc.setFont("helvetica", "bold");
     doc.text(`Relatório do Projeto: ${project.name}`, 14, 22);
 
     doc.setFontSize(11);
-    doc.setTextColor(100);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(148, 175, 212); // --text-secondary (#94afd4)
     doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`, 14, 30);
 
     const maxRows = Math.max(
@@ -127,13 +138,39 @@ export default function ProjectDetailPage() {
       head: [['A Fazer', 'Em Andamento', 'Concluída']],
       body: bodyData,
       theme: 'grid',
-      headStyles: { fillColor: [44, 62, 80], textColor: 255 },
-      styles: { fontSize: 10, cellPadding: 4, textColor: [40, 40, 40] },
+      headStyles: { 
+        fillColor: [16, 30, 52], // --bg-card (#101e34)
+        textColor: [232, 240, 254], // --text-primary (#e8f0fe)
+        fontStyle: 'bold',
+        lineColor: [30, 48, 80], // --border (#1e3050)
+        lineWidth: 0.1
+      },
+      bodyStyles: { 
+        fillColor: [8, 15, 30], // --bg-primary (#080f1e)
+        textColor: [148, 175, 212], // --text-secondary (#94afd4)
+        lineColor: [30, 48, 80], // --border (#1e3050)
+        lineWidth: 0.1
+      },
+      alternateRowStyles: {
+        fillColor: [12, 22, 41] // Leve clareada no bg-primary
+      },
+      styles: { fontSize: 10, cellPadding: 6 },
       columnStyles: {
         0: { cellWidth: '33%' },
         1: { cellWidth: '33%' },
         2: { cellWidth: '33%' },
       },
+      didParseCell: (data) => {
+        // Cores padrão do tema escuro para os status
+        let textColor = [148, 175, 212]; // A fazer (cinza azulado padrão)
+        if (data.column.index === 1) textColor = [96, 165, 250]; // Em andamento (azul)
+        if (data.column.index === 2) textColor = [74, 222, 128]; // Concluída (verde)
+
+        // Aplica a cor tanto no cabeçalho quanto nos itens da tabela que não são vazios
+        if (data.section === 'head' || (data.section === 'body' && data.cell.raw !== '')) {
+          data.cell.styles.textColor = textColor;
+        }
+      }
     });
 
     doc.save(`Relatorio_${project.name.replace(/\s+/g, '_')}.pdf`);
@@ -328,6 +365,25 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Toast Notifications */}
+      <style>{`
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-animate {
+          animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+      <div style={{ position: 'fixed', top: 24, right: 24, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 9999 }}>
+        {taskError && (
+          <div className="toast-animate" style={{ background: '#ef4444', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>error</span>
+            <span style={{ fontSize: 14, fontWeight: 500 }}>{taskError}</span>
+          </div>
+        )}
+      </div>
     </AppLayout>
   );
 }

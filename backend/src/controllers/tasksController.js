@@ -112,6 +112,24 @@ exports.create = async (req, res) => {
     const project = await prisma.project.findUnique({ where: { id: projectId } });
     if (!project) return res.status(404).json({ message: 'Projeto não encontrado' });
 
+    if (dueDate) {
+      const taskDueDate = new Date(dueDate);
+      taskDueDate.setUTCHours(0, 0, 0, 0);
+      const projectStart = new Date(project.startDate);
+      projectStart.setUTCHours(0, 0, 0, 0);
+      let projectEnd = null;
+      if (project.endDate) {
+        projectEnd = new Date(project.endDate);
+        projectEnd.setUTCHours(0, 0, 0, 0);
+      }
+      if (taskDueDate < projectStart || (projectEnd && taskDueDate > projectEnd)) {
+        const format = d => `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+        return res.status(400).json({ 
+          message: `O prazo da tarefa não pode estar fora do período do projeto (${format(projectStart)}${projectEnd ? ` a ${format(projectEnd)}` : ' em diante'}).` 
+        });
+      }
+    }
+
     const newTask = await prisma.task.create({
       data: {
         title,
@@ -167,7 +185,27 @@ exports.update = async (req, res) => {
     const fields = ['title', 'description', 'assigneeId', 'status', 'priority', 'dueDate'];
     fields.forEach(f => { if (req.body[f] !== undefined) data[f] = req.body[f]; });
 
-    if (data.dueDate) data.dueDate = new Date(data.dueDate);
+    if (data.dueDate) {
+      const project = await prisma.project.findUnique({ where: { id: task.projectId } });
+      const taskDueDate = new Date(data.dueDate);
+      taskDueDate.setUTCHours(0, 0, 0, 0);
+      const projectStart = new Date(project.startDate);
+      projectStart.setUTCHours(0, 0, 0, 0);
+      let projectEnd = null;
+      if (project.endDate) {
+        projectEnd = new Date(project.endDate);
+        projectEnd.setUTCHours(0, 0, 0, 0);
+      }
+      if (taskDueDate < projectStart || (projectEnd && taskDueDate > projectEnd)) {
+        const format = d => `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+        return res.status(400).json({ 
+          message: `O prazo da tarefa não pode estar fora do período do projeto (${format(projectStart)}${projectEnd ? ` a ${format(projectEnd)}` : ' em diante'}).` 
+        });
+      }
+      data.dueDate = new Date(data.dueDate);
+    } else if (data.dueDate === null) {
+      data.dueDate = null;
+    }
 
     const updatedTask = await prisma.task.update({
       where: { id: req.params.id },

@@ -388,7 +388,7 @@ export default function UserProfile() {
           animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}</style>
-      <div style={{ position: 'fixed', bottom: 24, right: 24, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 9999 }}>
+      <div style={{ position: 'fixed', top: 24, right: 24, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 9999 }}>
         {success && (
           <div className="toast-animate" style={{ background: '#10b981', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>check_circle</span>
