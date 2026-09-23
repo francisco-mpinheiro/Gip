@@ -40,7 +40,9 @@ export const profileAPI = {
   get: () => API.get('/user/profile'),
   update: (data) => {
     if (data instanceof FormData) {
-      return API.put('/user/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      return API.put('/user/profile', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
     }
     return API.put('/user/profile', data);
   },
@@ -49,7 +51,10 @@ export const profileAPI = {
 
 export const educationAPI = {
   list: () => API.get('/user/education'),
-  create: (formData) => API.post('/user/education', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  create: (formData) =>
+    API.post('/user/education', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
   remove: (id) => API.delete(`/user/education/${id}`),
 };
 
@@ -66,18 +71,22 @@ export const tasksAPI = {
   getById: (id) => API.get(`/tasks/${id}`),
   create: (data) => API.post('/tasks', data),
   update: (id, data) => API.put(`/tasks/${id}`, data),
-  updateStatus: (id, status) => API.patch(`/tasks/${id}/status`, { status }),
+  updateStatus: (id, status) =>
+    API.patch(`/tasks/${id}/status`, { status }),
   delete: (id) => API.delete(`/tasks/${id}`),
   getComments: (id) => API.get(`/tasks/${id}/comments`),
-  addComment: (id, content) => API.post(`/tasks/${id}/comments`, { content }),
+  addComment: (id, content) =>
+    API.post(`/tasks/${id}/comments`, { content }),
   uploadAttachment: (id, file) => {
     const formData = new FormData();
     formData.append('file', file);
+
     return API.post(`/tasks/${id}/attachments`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
-  deleteAttachment: (id, attachmentId) => API.delete(`/tasks/${id}/attachments/${attachmentId}`),
+  deleteAttachment: (id, attachmentId) =>
+    API.delete(`/tasks/${id}/attachments/${attachmentId}`),
 };
 
 export const dashboardAPI = {
@@ -93,6 +102,14 @@ export const notificationsAPI = {
 
 export const chatAPI = {
   getHistory: (userId) => API.get(`/chat/${userId}`),
+};
+
+// BUSCA GLOBAL
+export const searchAPI = {
+  global: (query) =>
+    API.get('/search', {
+      params: { q: query },
+    }),
 };
 
 export default API;

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth, ROLE_LABELS } from '../../context/AuthContext';
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import { useNavigate } from 'react-router-dom';
-import { notificationsAPI } from '../../utils/api';
+import { notificationsAPI, searchAPI } from '../../utils/api';
 
 export default function Topbar({ title }) {
   const { user } = useAuth();
@@ -11,6 +11,14 @@ export default function Topbar({ title }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const searchRef = useRef(null);
+  const searchRequestRef = useRef(0);
+  const searchTimerRef = useRef(null);
 
   useEffect(() => {
     if (user) {
@@ -38,6 +46,119 @@ export default function Topbar({ title }) {
     }
   };
 
+  // ─── BUSCA GLOBAL ─────────────────────────────────────────────────────────
+
+  const executeSearch = async (value) => {
+    const query = String(value || '').trim();
+
+    if (!query) {
+      setSearchResults([]);
+      setSearchOpen(false);
+      setSearchLoading(false);
+      return;
+    }
+
+    setSearchOpen(true);
+    setSearchLoading(true);
+
+    const requestId = ++searchRequestRef.current;
+
+    try {
+      const res = await searchAPI.global(query);
+
+      if (requestId !== searchRequestRef.current) return;
+
+      setSearchResults(res.data || []);
+    } catch (err) {
+      console.error('Erro na busca global:', err);
+
+      if (requestId === searchRequestRef.current) {
+        setSearchResults([]);
+      }
+    } finally {
+      if (requestId === searchRequestRef.current) {
+        setSearchLoading(false);
+      }
+    }
+  };
+
+  // Busca enquanto digita, com debounce de aproximadamente 300 ms.
+  useEffect(() => {
+    const query = searchTerm.trim();
+
+    if (!query) {
+      setSearchResults([]);
+      setSearchOpen(false);
+      setSearchLoading(false);
+      return undefined;
+    }
+
+    setSearchOpen(true);
+    setSearchLoading(true);
+
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+
+    searchTimerRef.current = setTimeout(() => {
+      executeSearch(query);
+    }, 300);
+
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, [searchTerm]);
+
+  // Fecha o dropdown ao clicar fora.
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleSearchKeyDown = async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+
+      const query = searchTerm.trim();
+      if (!query) return;
+
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+        searchTimerRef.current = null;
+      }
+
+      await executeSearch(query);
+    }
+
+    if (e.key === 'Escape') {
+      setSearchOpen(false);
+    }
+  };
+
+  const handleSearchResultClick = (result) => {
+    setSearchOpen(false);
+    setSearchTerm('');
+
+    if (result?.url) {
+      navigate(result.url);
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.isRead).length;
   const avatarIsImage = user?.avatar && String(user.avatar).startsWith('/uploads/');
   const avatarInitials = user?.name
@@ -45,7 +166,186 @@ export default function Topbar({ title }) {
     : '?';
 
   return (
-    <header className="topbar">
+    <header
+      className="topbar"
+      style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+
+      {/* BUSCA GLOBAL */}
+      <div
+        ref={searchRef}
+        style={{
+          position: 'relative',
+          flex: 1,
+          maxWidth: 500,
+          marginRight: 20,
+        }}
+      >
+        <div
+          className="topbar-search"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            width: '100%',
+            height: 40,
+            padding: '0 12px',
+            background: 'var(--bg-input)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            boxSizing: 'border-box',
+          }}
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{
+              fontSize: 20,
+              color: 'var(--text-muted)',
+              flexShrink: 0,
+            }}
+          >
+            search
+          </span>
+
+          <input
+            type="text"
+            placeholder="Buscar projetos, tarefas ou membros..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onFocus={() => {
+              if (searchTerm.trim()) {
+                setSearchOpen(true);
+              }
+            }}
+            onKeyDown={handleSearchKeyDown}
+            aria-label="Buscar projetos, tarefas ou membros"
+            style={{
+              width: '100%',
+              minWidth: 0,
+              border: 0,
+              outline: 'none',
+              background: 'transparent',
+              color: 'var(--text-primary)',
+              fontSize: 13,
+            }}
+          />
+        </div>
+
+        {searchOpen && searchTerm.trim() && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 'calc(100% + 8px)',
+              left: 0,
+              right: 0,
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: 10,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.18)',
+              overflow: 'hidden',
+              zIndex: 2000,
+            }}
+          >
+            {searchLoading ? (
+              <div
+                style={{
+                  padding: 16,
+                  color: 'var(--text-secondary)',
+                  fontSize: 13,
+                }}
+              >
+                Buscando...
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div
+                style={{
+                  padding: 16,
+                  color: 'var(--text-secondary)',
+                  fontSize: 13,
+                }}
+              >
+                Nenhum resultado encontrado
+              </div>
+            ) : (
+              searchResults.map((result) => (
+                <button
+                  key={`${result.type}-${result.id}`}
+                  type="button"
+                  onClick={() => handleSearchResultClick(result)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '12px 14px',
+                    background: 'transparent',
+                    border: 0,
+                    borderBottom: '1px solid var(--border-light)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  <span
+                    style={{
+                      minWidth: 70,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: 'var(--text-secondary)',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {result.typeLabel}
+                  </span>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {result.name}
+                    </div>
+
+                    {result.meta && (
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: 'var(--text-secondary)',
+                          marginTop: 2,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {result.meta}
+                      </div>
+                    )}
+                  </div>
+
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      fontSize: 18,
+                      color: 'var(--text-muted)',
+                    }}
+                  >
+                    arrow_forward
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="topbar-right">
         <button 
@@ -54,6 +354,7 @@ export default function Topbar({ title }) {
           onClick={() => {
             setShowNotif(!showNotif);
             setShowSettings(false);
+            setSearchOpen(false);
           }}
         >
           <span className="material-symbols-outlined">notifications</span>
@@ -64,6 +365,7 @@ export default function Topbar({ title }) {
           onClick={() => {
             setShowSettings(!showSettings);
             setShowNotif(false);
+            setSearchOpen(false);
           }}
           title="Configurações"
         >
