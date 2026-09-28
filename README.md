@@ -1,10 +1,20 @@
-# ⚡ GIP MVP
+# 🎯 GIP - Gestor Inteligente de Projetos
+
+![GIP - Gestor Inteligente de Projetos](./images/image.png)
 
 Plataforma completa de gestão de projetos e equipes com RBAC, Kanban e dashboard de desempenho.
 
 ---
 
-## 🚀 Como Rodar o Ambiente Local
+## 💻 Tecnologias Utilizadas
+
+<div align="center">
+  <img src="https://skillicons.dev/icons?i=react,nodejs,express,prisma,postgres,docker,figma" alt="Tecnologias Utilizadas" />
+</div>
+
+---
+
+## ⚙️ Como Rodar o Ambiente Local
 
 Siga os passos abaixo para rodar o backend, frontend e o banco de dados da aplicação na sua máquina.
 
@@ -76,7 +86,7 @@ O frontend é uma SPA (Single Page Application) desenvolvida em React.
 
 ---
 
-## 👤 Usuários de Teste
+## 🔑 Usuários de Teste
 
 | Email | Papel | Senha |
 |-------|-------|-------|
@@ -88,7 +98,7 @@ O frontend é uma SPA (Single Page Application) desenvolvida em React.
 
 ---
 
-## 🏗 Estrutura do Projeto
+## 🗂️ Estrutura do Projeto
 
 ```
 gip/
@@ -140,7 +150,7 @@ gip/
 
 ---
 
-## 🔐 RBAC — Controle de Acesso
+## 🛡️ RBAC — Controle de Acesso
 
 | Ação | Admin Plataforma | Admin Empresa | Gestor Área | Gerente Projeto | Funcionário |
 |------|:---:|:---:|:---:|:---:|:---:|
@@ -155,7 +165,7 @@ gip/
 
 ---
 
-## 🌐 Endpoints da API
+## 🔌 Endpoints da API
 
 ### Auth
 | Método | Rota | Descrição |
@@ -191,6 +201,25 @@ gip/
 | PATCH | /api/tasks/:id/status | Autenticado |
 | DELETE | /api/tasks/:id | Gestor+ |
 
+### Notificações
+| Método | Rota | Permissão |
+|--------|------|-----------|
+| GET | /api/notifications | Autenticado |
+| PATCH | /api/notifications/:id/read | Autenticado |
+| PATCH | /api/notifications/read-all | Autenticado |
+
+### Formação Acadêmica
+| Método | Rota | Permissão |
+|--------|------|-----------|
+| GET | /api/education | Autenticado |
+| POST | /api/education | Autenticado |
+| DELETE | /api/education/:id | Autenticado |
+
+### Chat / Mensagens
+| Método | Rota | Permissão |
+|--------|------|-----------|
+| GET | /api/chat/:userId | Autenticado |
+
 ### Dashboard
 | Método | Rota | Permissão |
 |--------|------|-----------|
@@ -199,9 +228,21 @@ gip/
 
 ---
 
-## ✨ Funcionalidades Implementadas
+## 💎 Funcionalidades Implementadas
 
-- [x] Login/Registro com JWT
+### Entregas Recentes (Sprints 1 e 2)
+- [] Redefinição de senha via e-mail (Em Desenvolvimento)
+- [x] Upload de foto de perfil
+- [x] Sistema de Notificações (alertas de tarefas e projetos)
+- [x] Gestão de Formação Acadêmica (com upload de certificados)
+- [x] Chat em tempo real via WebSockets (Socket.io)
+- [x] Painel Lateral (Drawer) de perfil rápido e conversas
+- [x] Visualizador de anexos/certificados
+- [x] Alertas visuais de sucesso/erro
+- [x] Frontend 100% responsivo
+
+### Entregas Anteriores (Semestre Passado)
+- [x] Login e Registro com JWT
 - [x] RBAC completo com 5 níveis
 - [x] Dashboard com métricas e gráfico semanal
 - [x] Projetos: CRUD + progresso automático
@@ -210,10 +251,7 @@ gip/
 - [x] Equipe por departamento (grade + tabela)
 - [x] Desempenho com ranking e barras
 - [x] Gestão de usuários (admin)
-- [x] Perfil editável
+- [x] Perfil editável (dados básicos)
 - [x] Configurações com toggles
-- [x] Filtros e busca em todas as páginas
+- [x] Filtros em todas as páginas
 - [x] Persistência de dados com PostgreSQL e Prisma ORM
-
----
-
