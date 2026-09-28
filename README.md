@@ -2,7 +2,12 @@
 
 ![GIP - Gestor Inteligente de Projetos](./images/image.png)
 
-Plataforma completa de gestão de projetos e equipes com RBAC, Kanban e dashboard de desempenho.
+O **GIP** foi projetado para resolver a fragmentação, a perda de rastreabilidade e a lentidão na gestão de múltiplos projetos organizacionais. A solução centraliza e automatiza o fluxo de trabalho, permitindo que equipes foquem na execução de alto valor, substituindo o microgerenciamento por visibilidade em tempo real.
+
+### 🏗️ Arquitetura e Core da Solução
+- **Controle de Acesso Seguro (RBAC):** Sistema robusto de papéis e permissões (Role-Based Access Control), garantindo que a visualização de dados, delegação de tarefas e manipulação de projetos seja restrita ao nível de hierarquia do usuário.
+- **Máquina de Estados:** Transições de status com regras de negócio rígidas. Um projeto só pode ser dado como "Concluído" se todas as suas tarefas filhas estiverem finalizadas ou canceladas.
+- **Trilha de Auditoria (Audit Trail):** Registro automático de logs e atividades críticas do sistema na tabela de Atividades (ex: mudança de responsáveis, alteração de prazos e deleções).
 
 ---
 
@@ -23,8 +28,6 @@ Siga os passos abaixo para rodar o backend, frontend e o banco de dados da aplic
 - **npm** ou **yarn**
 - **Docker** e **Docker Compose** (para rodar o PostgreSQL)
 
----
-
 ### Passo 1: Subir o Banco de Dados (PostgreSQL via Docker)
 
 O projeto utiliza o PostgreSQL como banco de dados principal. A configuração já está pronta usando o Docker Compose.
@@ -38,8 +41,6 @@ O projeto utiliza o PostgreSQL como banco de dados principal. A configuração j
    docker compose up -d
    ```
    *(O banco estará rodando na porta `5432`)*
-
----
 
 ### Passo 2: Configurar e Rodar o Backend (API)
 
@@ -63,8 +64,6 @@ O backend é construído em Node.js com Express e utiliza o Prisma ORM para gere
    npm run dev
    ```
    *(A API estará rodando em `http://localhost:5000`. O script `dev` também se encarrega de popular o banco automaticamente executando o arquivo de seed, se necessário).*
-
----
 
 ### Passo 3: Configurar e Rodar o Frontend (React)
 
@@ -255,3 +254,20 @@ gip/
 - [x] Configurações com toggles
 - [x] Filtros em todas as páginas
 - [x] Persistência de dados com PostgreSQL e Prisma ORM
+
+---
+
+## 🗺️ Próximos Passos (Roadmap)
+
+*(A definir)*
+
+## 👥 Autores
+
+- **Francisco Matheus** - [GitHub](https://github.com/francisco-mpinheiro)
+- **Fabricio Mendes** - [GitHub](https://github.com/Fabricio-mp)
+- **Lucas Vellasco** - [GitHub](https://github.com/vellas1234)
+- **Matheus Campos** - [GitHub](https://github.com/matheusccrr05)
+
+## 📄 Licença
+
+Este projeto é licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
