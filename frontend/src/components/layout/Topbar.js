@@ -6,7 +6,7 @@ import { notificationsAPI, searchAPI } from '../../utils/api';
 
 export default function Topbar({ title }) {
   const { user } = useAuth();
-  const { theme, fontSize, toggleTheme, changeFontSize } = usePreferences();
+  const { theme, fontSize, toggleTheme, changeTheme, changeFontSize } = usePreferences();
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
@@ -509,7 +509,7 @@ export default function Topbar({ title }) {
               <div className="theme-toggle">
                 <button
                   className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
-                  onClick={toggleTheme}
+                  onClick={() => changeTheme('dark')}
                   title="Tema escuro"
                   style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
@@ -517,7 +517,7 @@ export default function Topbar({ title }) {
                 </button>
                 <button
                   className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
-                  onClick={toggleTheme}
+                  onClick={() => changeTheme('light')}
                   title="Tema claro"
                   style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                 >

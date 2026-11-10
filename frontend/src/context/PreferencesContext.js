@@ -29,12 +29,15 @@ export const PreferencesProvider = ({ children }) => {
     html.style.fontSize = fontSizeValue_;
   };
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('gip-theme', newTheme);
-    applyPreferences(newTheme, fontSize);
-  };
+  const changeTheme = (newTheme) => {
+  setTheme(newTheme);
+  localStorage.setItem('gip-theme', newTheme);
+  applyPreferences(newTheme, fontSize);
+};
+
+const toggleTheme = () => {
+  changeTheme(theme === 'dark' ? 'light' : 'dark');
+};
 
   const changeFontSize = (size) => {
     setFontSize(size);
@@ -43,7 +46,7 @@ export const PreferencesProvider = ({ children }) => {
   };
 
   return (
-    <PreferencesContext.Provider value={{ theme, fontSize, toggleTheme, changeFontSize }}>
+    <PreferencesContext.Provider value={{ theme, fontSize, toggleTheme, changeTheme, changeFontSize }}>
       {children}
     </PreferencesContext.Provider>
   );
