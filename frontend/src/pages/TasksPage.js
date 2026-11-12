@@ -4,6 +4,8 @@ import AppLayout from '../components/layout/AppLayout';
 import { tasksAPI, projectsAPI, usersAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { formatDateLocal } from '../utils/dateUtils';
+import { rankMembersForTask } from '../utils/smartAssign';
+import SmartAssignRecommendations from '../components/SmartAssignRecommendations';
 
 const STATUS_LABEL = { a_fazer: 'A Fazer', em_andamento: 'Em Andamento', concluido: 'Concluído' };
 const STATUS_CLASS = { a_fazer: 'badge-a_fazer', em_andamento: 'badge-em_andamento', concluido: 'badge-concluido' };
@@ -25,6 +27,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('list');
   const [modal, setModal] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
   const [editing, setEditing] = useState(null);
   const [detailsModal, setDetailsModal] = useState(false);
   const [viewingTask, setViewingTask] = useState(null);
@@ -61,7 +64,7 @@ export default function TasksPage() {
     }
   };
 
-  const openCreate = () => { setEditing(null); setForm(emptyForm); setModal(true); };
+  const openCreate = () => { setEditing(null); setForm(emptyForm); setShowRecommendations(false); setModal(true); };
   
   const openDetails = (t) => {
     setViewingTask(t);
@@ -79,6 +82,7 @@ export default function TasksPage() {
       status: t.status, priority: t.priority,
       dueDate: t.dueDate ? t.dueDate.slice(0, 10) : '',
     });
+    setShowRecommendations(false);
     setModal(true);
     setDetailsModal(false);
   };
@@ -172,12 +176,23 @@ export default function TasksPage() {
     return acc;
   }, {});
 
-  const projectMembers = form.projectId
-    ? (projects.find(p => p.id === form.projectId)?.members || [])
-    : [];
-  const assignableUsers = form.projectId
+  const selectedProject = form.projectId
+    ? projects.find(p => p.id === form.projectId)
+    : null;
+  const projectMembers = selectedProject?.members || [];
+  const assignableUsers = (form.projectId && projectMembers.length > 0)
     ? users.filter(u => projectMembers.includes(u.id))
     : users;
+  const rankedAssignableUsers = rankMembersForTask(
+    assignableUsers.filter(u => u.active),
+    {
+      taskTitle: form.title,
+      taskDescription: form.description,
+      taskPriority: form.priority,
+      project: selectedProject,
+      allTasks: tasks,
+    }
+  );
 
   return (
     <AppLayout>
@@ -391,10 +406,29 @@ export default function TasksPage() {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Responsável</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                      <label className="form-label" style={{ marginBottom: 0 }}>Responsável</label>
+                      <button
+                        type="button"
+                        onClick={() => setShowRecommendations(v => !v)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: 'var(--accent-blue)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {showRecommendations ? 'Ocultar' : 'Recomendar responsável'}
+                      </button>
+                    </div>
                     <select className="form-select" value={form.assigneeId} onChange={e => setForm(f => ({ ...f, assigneeId: e.target.value }))}>
                       <option value="">Sem responsável</option>
-                      {assignableUsers.filter(u => u.active).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                      {assignableUsers.filter(u => u.active).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="form-group">
@@ -406,6 +440,13 @@ export default function TasksPage() {
                     </select>
                   </div>
                 </div>
+                <SmartAssignRecommendations
+                  isOpen={showRecommendations}
+                  onClose={() => setShowRecommendations(false)}
+                  rankedMembers={rankedAssignableUsers}
+                  selectedId={form.assigneeId}
+                  onSelect={userId => setForm(f => ({ ...f, assigneeId: userId }))}
+                />
                 {editing && (
                   <div className="form-group">
                     <label className="form-label">Status</label>

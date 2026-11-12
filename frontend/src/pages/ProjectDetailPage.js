@@ -4,6 +4,8 @@ import AppLayout from '../components/layout/AppLayout';
 import { projectsAPI, tasksAPI, usersAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { formatDateLocal } from '../utils/dateUtils';
+import { rankMembersForTask } from '../utils/smartAssign';
+import SmartAssignRecommendations from '../components/SmartAssignRecommendations';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -27,6 +29,7 @@ export default function ProjectDetailPage() {
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [taskModal, setTaskModal] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [taskForm, setTaskForm] = useState(emptyTask);
   const [taskError, setTaskError] = useState("");
@@ -43,7 +46,7 @@ export default function ProjectDetailPage() {
 
   useEffect(load, [load]);
 
-  const openCreateTask = () => { setEditingTask(null); setTaskForm(emptyTask); setTaskError(""); setTaskModal(true); };
+  const openCreateTask = () => { setEditingTask(null); setTaskForm(emptyTask); setTaskError(""); setShowRecommendations(false); setTaskModal(true); };
   const openEditTask = (t) => {
     setEditingTask(t);
     setTaskForm({
@@ -52,6 +55,7 @@ export default function ProjectDetailPage() {
       dueDate: t.dueDate ? t.dueDate.slice(0, 10) : '',
     });
     setTaskError("");
+    setShowRecommendations(false);
     setTaskModal(true);
   };
 
@@ -101,6 +105,17 @@ export default function ProjectDetailPage() {
   }, {});
 
   const members = project.members || [];
+  const candidateMembers = members.length > 0
+    ? members.filter(m => m.active !== false)
+    : allUsers.filter(u => u.active);
+
+  const rankedMembers = rankMembersForTask(candidateMembers, {
+    taskTitle: taskForm.title,
+    taskDescription: taskForm.description,
+    taskPriority: taskForm.priority,
+    project,
+    allTasks: project.tasks || [],
+  });
 
   const handleGenerateReport = () => {
     const doc = new jsPDF();
@@ -337,10 +352,29 @@ export default function ProjectDetailPage() {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Responsável</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                      <label className="form-label" style={{ marginBottom: 0 }}>Responsável</label>
+                      <button
+                        type="button"
+                        onClick={() => setShowRecommendations(v => !v)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: 'var(--accent-blue)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {showRecommendations ? 'Ocultar' : 'Recomendar responsável'}
+                      </button>
+                    </div>
                     <select className="form-select" value={taskForm.assigneeId} onChange={e => setTaskForm(f => ({ ...f, assigneeId: e.target.value }))}>
                       <option value="">Sem responsável</option>
-                      {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                      {candidateMembers.map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="form-group">
@@ -352,6 +386,13 @@ export default function ProjectDetailPage() {
                     </select>
                   </div>
                 </div>
+                <SmartAssignRecommendations
+                  isOpen={showRecommendations}
+                  onClose={() => setShowRecommendations(false)}
+                  rankedMembers={rankedMembers}
+                  selectedId={taskForm.assigneeId}
+                  onSelect={userId => setTaskForm(f => ({ ...f, assigneeId: userId }))}
+                />
                 <div className="form-group">
                   <label className="form-label">Prazo</label>
                   <input className="form-input" type="date" value={taskForm.dueDate} onChange={e => setTaskForm(f => ({ ...f, dueDate: e.target.value }))} />
