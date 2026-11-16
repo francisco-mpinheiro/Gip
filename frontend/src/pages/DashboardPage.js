@@ -4,7 +4,7 @@ import { formatDateLocal } from '../utils/dateUtils';
 import AppLayout from '../components/layout/AppLayout';
 import { dashboardAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, PieChart, Pie, Cell, Tooltip, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 const STATUS_LABEL = { em_progresso: 'Em Progresso', planejamento: 'Planejamento', concluido: 'Concluído', a_fazer: 'A Fazer', em_andamento: 'Em Andamento' };
 const STATUS_CLASS = { em_progresso: 'badge-em_progresso', planejamento: 'badge-planejamento', concluido: 'badge-concluido', a_fazer: 'badge-a_fazer', em_andamento: 'badge-em_andamento', pendente: 'badge-pendente' };
@@ -63,7 +63,7 @@ export default function DashboardPage() {
     </AppLayout>
   );
 
-  const { metrics, recentProjects, recentTasks, recentActivities, tasksThisWeek } = data || {};
+  const { metrics, recentProjects, recentTasks, recentActivities, tasksThisWeek, taskCreationByDay } = data || {};
 
 
   return (
@@ -290,6 +290,42 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="card" style={{ gridColumn: '1 / -1', marginTop: 20 }}>
+        <div className="card-header">
+          <span className="card-title">Tarefas criadas nos últimos 7 dias</span>
+        </div>
+        {taskCreationByDay?.length ? (
+          <div style={{ width: '100%', height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={taskCreationByDay} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
+                <CartesianGrid stroke="var(--border-light)" vertical={false} />
+                <XAxis dataKey="day" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} width={32} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: 'var(--accent-blue-dim)' }}
+                  contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
+                  formatter={(value) => [value, 'Tarefas']}
+                />
+                <Bar
+                  dataKey="count"
+                  name="Tarefas"
+                  fill="var(--accent-blue)"
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={44}
+                  style={{ cursor: 'pointer' }}
+                  onClick={(entry) => {
+                    const selectedDate = entry?.payload?.date;
+                    if (selectedDate) navigate(`/tasks?createdOn=${selectedDate}`);
+                  }}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="empty-state"><p>Nenhuma tarefa criada neste período.</p></div>
+        )}
       </div>
           </>
         );

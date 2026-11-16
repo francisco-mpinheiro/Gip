@@ -52,23 +52,25 @@ exports.getDashboard = async (req, res) => {
     const overdueTasks   = tasks.filter(t => t.dueDate && new Date(t.dueDate) < now && t.status !== 'concluido');
     const membersCount   = await prisma.user.count({ where: { active: true } });
 
-    // Last 7 days activities
+    // Tasks created in the last 7 days
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0,0,0,0);
     
-    const recentDbActivities = await prisma.activity.findMany({
-      where: { createdAt: { gte: sevenDaysAgo } },
+    const chartTasksWhere = user.role === ROLES.EMPLOYEE ? tasksWhere : {};
+    const chartTasks = await prisma.task.findMany({
+      where: { ...chartTasksWhere, createdAt: { gte: sevenDaysAgo } },
       select: { createdAt: true }
     });
 
-    const weeklyActivity = [];
+    const taskCreationByDay = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dayStr = date.toLocaleDateString('pt-BR', { weekday: 'short' });
-      const count = recentDbActivities.filter(a => new Date(a.createdAt).toDateString() === date.toDateString()).length;
-      weeklyActivity.push({ day: dayStr, count: count || Math.floor(Math.random() * 8) + 2 });
+      const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const count = chartTasks.filter(task => new Date(task.createdAt).toDateString() === date.toDateString()).length;
+      taskCreationByDay.push({ day: dayStr, date: dateKey, count });
     }
 
     const recentTasks = tasks.slice(0, 5);
@@ -132,7 +134,7 @@ exports.getDashboard = async (req, res) => {
         totalMembers:    membersCount,
         hoursWorked:     1248,
       },
-      recentProjects, recentTasks, recentActivities, weeklyActivity, tasksThisWeek,
+      recentProjects, recentTasks, recentActivities, taskCreationByDay, tasksThisWeek,
     });
   } catch (err) {
     res.status(500).json({ message: 'Erro interno' });

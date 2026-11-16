@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { tasksAPI, projectsAPI, usersAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
@@ -18,9 +18,16 @@ const COLUMNS = [
 
 const emptyForm = { title: '', description: '', projectId: '', assigneeId: '', status: 'a_fazer', priority: 'media', dueDate: '' };
 
+const toLocalDateKey = (dateValue) => {
+  const date = new Date(dateValue);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
 export default function TasksPage() {
   const { user, canDo } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const createdOnFilter = searchParams.get('createdOn') || '';
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -168,7 +175,8 @@ export default function TasksPage() {
     const st = filterStatus ? t.status === filterStatus : true;
     const pr = filterPriority ? t.priority === filterPriority : true;
     const my = filterMine ? t.assigneeId === user?.id : true;
-    return s && st && pr && my;
+    const createdOn = createdOnFilter ? toLocalDateKey(t.createdAt) === createdOnFilter : true;
+    return s && st && pr && my && createdOn;
   });
 
   const tasksByCol = COLUMNS.reduce((acc, col) => {
@@ -193,6 +201,9 @@ export default function TasksPage() {
       allTasks: tasks,
     }
   );
+  const createdDateLabel = createdOnFilter
+    ? new Date(`${createdOnFilter}T00:00:00`).toLocaleDateString('pt-BR')
+    : '';
 
   return (
     <AppLayout>
@@ -245,6 +256,13 @@ export default function TasksPage() {
           Minhas Tarefas
         </button>
       </div>
+
+      {createdOnFilter && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, padding: '10px 12px', background: 'var(--accent-blue-dim)', border: '1px solid var(--border)', borderRadius: 6 }}>
+          <span>Tarefas criadas em {createdDateLabel}</span>
+          <button className="btn btn-ghost btn-sm" onClick={() => setSearchParams({})}>Limpar filtro</button>
+        </div>
+      )}
 
       {loading ? (
         <div className="loading"><div className="spinner" />Carregando...</div>
