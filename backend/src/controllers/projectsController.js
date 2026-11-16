@@ -52,7 +52,20 @@ exports.getById = async (req, res) => {
     const project = await prisma.project.findUnique({
       where: { id: req.params.id },
       include: {
-        members: { select: { id: true, name: true, avatar: true, role: true, department: true } },
+        members: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            role: true,
+            department: true,
+            active: true,
+            educations: true,
+            tasks: {
+              select: { id: true, status: true, dueDate: true, projectId: true }
+            }
+          }
+        },
         tasks: {
           include: {
             assignee: { select: { id: true, name: true, avatar: true } }

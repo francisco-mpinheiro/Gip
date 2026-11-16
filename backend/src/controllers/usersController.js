@@ -20,7 +20,15 @@ exports.getAll = async (req, res) => {
     if (department) where.department = department;
     if (active !== undefined) where.active = (active === 'true');
 
-    const users = await prisma.user.findMany({ where });
+    const users = await prisma.user.findMany({
+      where,
+      include: {
+        educations: true,
+        tasks: {
+          select: { id: true, status: true, dueDate: true, projectId: true }
+        }
+      }
+    });
     res.json(users.map(sanitizeUser));
   } catch (err) {
     res.status(500).json({ message: 'Erro interno' });
