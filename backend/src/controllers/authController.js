@@ -265,10 +265,9 @@ exports.login = async (req, res) => {
       user: sanitizeUser(user)
     });
   } catch (err) {
-    return res.status(500).json({
-      message: 'Erro interno do servidor'
-    });
-  }
+  console.error('ERRO NO LOGIN:', err);
+  return res.status(500).json({ message: 'Erro interno do servidor' });
+}
 };
 
 // POST /api/auth/register

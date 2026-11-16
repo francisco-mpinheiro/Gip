@@ -1,22 +1,44 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDateLocal } from '../utils/dateUtils';
 import AppLayout from '../components/layout/AppLayout';
 import { dashboardAPI } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
 
-const STATUS_LABEL = { em_progresso: 'Em Progresso', planejamento: 'Planejamento', concluido: 'Concluído', a_fazer: 'A Fazer', em_andamento: 'Em Andamento' };
-const STATUS_CLASS = { em_progresso: 'badge-em_progresso', planejamento: 'badge-planejamento', concluido: 'badge-concluido', a_fazer: 'badge-a_fazer', em_andamento: 'badge-em_andamento', pendente: 'badge-pendente' };
-const PRIORITY_CLASS = { alta: 'badge-alta', media: 'badge-media', baixa: 'badge-baixa' };
+const STATUS_LABEL = {
+  em_progresso: 'Em Progresso',
+  planejamento: 'Planejamento',
+  concluido: 'Concluído',
+  a_fazer: 'A Fazer',
+  em_andamento: 'Em Andamento'
+};
+
+const STATUS_CLASS = {
+  em_progresso: 'badge-em_progresso',
+  planejamento: 'badge-planejamento',
+  concluido: 'badge-concluido',
+  a_fazer: 'badge-a_fazer',
+  em_andamento: 'badge-em_andamento',
+  pendente: 'badge-pendente'
+};
+
+const PRIORITY_CLASS = {
+  alta: 'badge-alta',
+  media: 'badge-media',
+  baixa: 'badge-baixa'
+};
 
 function timeAgo(date) {
   const d = new Date(date);
   const diff = Date.now() - d.getTime();
   const m = Math.floor(diff / 60000);
+
   if (m < 1) return 'agora';
   if (m < 60) return `${m}min atrás`;
+
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h atrás`;
+
   return `${Math.floor(h / 24)}d atrás`;
 }
 
@@ -28,141 +50,438 @@ function progressColor(pct) {
 
 function getDateStyle(dateStr) {
   if (!dateStr) return {};
+
   const d = new Date(dateStr);
   const today = new Date();
-  const taskDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-  
-  if (taskDay <= todayDay) return { color: 'var(--accent-red)', fontWeight: 500 };
-  
+
+  const taskDay = new Date(
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate()
+  ).getTime();
+
+  const todayDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  ).getTime();
+
+  if (taskDay <= todayDay) {
+    return {
+      color: 'var(--accent-red)',
+      fontWeight: 500
+    };
+  }
+
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowDay = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate()).getTime();
-  if (taskDay === tomorrowDay) return { color: 'var(--accent-amber)', fontWeight: 500 };
-  
+
+  const tomorrowDay = new Date(
+    tomorrow.getFullYear(),
+    tomorrow.getMonth(),
+    tomorrow.getDate()
+  ).getTime();
+
+  if (taskDay === tomorrowDay) {
+    return {
+      color: 'var(--accent-amber)',
+      fontWeight: 500
+    };
+  }
+
   return { color: 'var(--text-secondary)' };
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     dashboardAPI.get()
       .then(r => setData(r.data))
-      .catch(console.error)
+      .catch(err => {
+        console.error('Erro ao carregar dashboard:', err);
+        setError(true);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return (
-    <AppLayout>
-      <div className="loading"><div className="spinner" />Carregando...</div>
-    </AppLayout>
-  );
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="loading">
+          <div className="spinner" />
+          Carregando...
+        </div>
+      </AppLayout>
+    );
+  }
 
-  const { metrics, recentProjects, recentTasks, recentActivities, tasksThisWeek } = data || {};
+  if (error || !data) {
+    return (
+      <AppLayout>
+        <div className="page-header">
+          <h1>Dashboard</h1>
+        </div>
 
+        <div className="empty-state">
+          <p>Não foi possível carregar o Dashboard.</p>
+          <button onClick={() => window.location.reload()}>
+            Tentar novamente
+          </button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const {
+    metrics,
+    recentProjects = [],
+    recentTasks = [],
+    recentActivities = [],
+    tasksThisWeek = []
+  } = data;
+
+  // Usa a permissão efetiva de acesso a projetos enviada pelo backend.
+  // O fallback mantém compatibilidade caso a API ainda não envie esse campo.
+  const hasProjectAccess =
+    data.hasProjectAccess ??
+    data.hasLinkedProject ??
+    false;
 
   return (
     <AppLayout>
       <div className="page-header">
         <h1>Dashboard</h1>
-
       </div>
 
-      {/* METRIC CARDS */}
+      {!hasProjectAccess && (
+        <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="empty-state">
+            <p>Você ainda não foi vinculado a um projeto.</p>
+            <p>
+              Quando um projeto for associado à sua conta,
+              as informações relacionadas aparecerão aqui.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* INDICADORES */}
       <div className="metric-cards">
-        <div className="metric-card">
-          <div className="metric-card-header">
-            <div className="metric-label" style={{ marginTop: 0 }}>Projetos Ativos</div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
-              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-blue)' }}>rocket_launch</span>
+
+        {hasProjectAccess && (
+          <div className="metric-card">
+            <div className="metric-card-header">
+              <div
+                className="metric-label"
+                style={{ marginTop: 0 }}
+              >
+                Projetos Ativos
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--bg-primary)'
+              }}>
+                <span
+                  className="material-icons"
+                  style={{
+                    fontSize: '15px',
+                    color: 'var(--accent-blue)'
+                  }}
+                >
+                  rocket_launch
+                </span>
+              </div>
+            </div>
+
+            <div style={{
+              fontSize: '28px',
+              fontWeight: 'bold',
+              marginTop: '10px',
+              color: 'var(--text-primary)'
+            }}>
+              {metrics?.activeProjects || 0}
             </div>
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: 'var(--text-primary)' }}>{metrics?.activeProjects || 0}</div>
+        )}
+
+        <div className="metric-card">
+          <div className="metric-card-header">
+            <div
+              className="metric-label"
+              style={{ marginTop: 0 }}
+            >
+              Tarefas<br />Concluídas
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--bg-primary)'
+            }}>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: '15px',
+                  color: 'var(--text-secondary)'
+                }}
+              >
+                task_alt
+              </span>
+            </div>
+          </div>
+
+          <div style={{
+            fontSize: '28px',
+            fontWeight: 'bold',
+            marginTop: '10px',
+            color: 'var(--text-primary)'
+          }}>
+            {metrics?.completedTasks || 0}
+          </div>
         </div>
-        <div className="metric-card">
-          <div className="metric-card-header">
-            <div className="metric-label" style={{ marginTop: 0 }}>Tarefas<br />Concluídas</div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
-              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>task_alt</span>
+
+        {hasProjectAccess && (
+          <div className="metric-card">
+            <div className="metric-card-header">
+              <div
+                className="metric-label"
+                style={{ marginTop: 0 }}
+              >
+                Membros da<br />Equipe
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--bg-primary)'
+              }}>
+                <span
+                  className="material-icons"
+                  style={{
+                    fontSize: '15px',
+                    color: 'var(--accent-amber)'
+                  }}
+                >
+                  groups
+                </span>
+              </div>
+            </div>
+
+            <div style={{
+              fontSize: '28px',
+              fontWeight: 'bold',
+              marginTop: '10px',
+              color: 'var(--text-primary)'
+            }}>
+              {metrics?.totalMembers || 0}
             </div>
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: 'var(--text-primary)' }}>{metrics?.completedTasks || 0}</div>
-        </div>
+        )}
+
         <div className="metric-card">
           <div className="metric-card-header">
-            <div className="metric-label" style={{ marginTop: 0 }}>Membros da<br />Equipe</div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
-              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-amber)' }}>groups</span>
+            <div
+              className="metric-label"
+              style={{ marginTop: 0 }}
+            >
+              Tarefas<br />Atrasadas
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--bg-primary)'
+            }}>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: '15px',
+                  color: 'var(--accent-red)'
+                }}
+              >
+                assignment_late
+              </span>
             </div>
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: 'var(--text-primary)' }}>{metrics?.totalMembers || 0}</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-card-header">
-            <div className="metric-label" style={{ marginTop: 0 }}>Tarefas<br />Atrasadas</div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-primary)' }}>
-              <span className="material-icons" style={{ fontSize: '15px', color: 'var(--accent-red)' }}>assignment_late</span>
-            </div>
+
+          <div style={{
+            fontSize: '28px',
+            fontWeight: 'bold',
+            marginTop: '10px',
+            color: 'var(--text-primary)'
+          }}>
+            {metrics?.overdueTasks || 0}
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '10px', color: 'var(--text-primary)' }}>{metrics?.overdueTasks || 0}</div>
         </div>
       </div>
 
-      {/* PROJECTS + TASKS */}
+      {/* PROJETOS E TAREFAS */}
       <div className="grid-2">
-        {/* RECENT PROJECTS */}
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">Projetos Recentes</span>
-            <span className="card-link" onClick={() => navigate('/projects')}>Ver todos</span>
-          </div>
-          {recentProjects?.length === 0 && <div className="empty-state"><p>Nenhum projeto ainda</p></div>}
-          {recentProjects?.map(p => (
-            <div key={p.id} className="project-item" onClick={() => navigate(`/projects/${p.id}`)} style={{ cursor: 'pointer' }}>
-              <div className="project-item-header">
-                <span className="project-name">{p.name}</span>
-                <span className="project-pct">{p.progress}%</span>
-              </div>
-              <div className="project-meta">
-                <span className="project-meta-item">
-                  <span className={`badge ${STATUS_CLASS[p.status]}`}>{STATUS_LABEL[p.status] || p.status}</span>
-                </span>
-                <span className="project-meta-item"><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>group</span> {p.memberCount}</span>
-                {p.endDate && (
-                  <span className="project-meta-item">
-                    <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(p.endDate, { day: '2-digit', month: 'short', year: 'numeric' })}
-                  </span>
-                )}
-              </div>
-              <div className="progress-bar">
-                <div className={`progress-bar-fill ${progressColor(p.progress)}`} style={{ width: `${p.progress}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* RECENT TASKS */}
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">Tarefas Recentes</span>
-            <span className="card-link" onClick={() => navigate('/tasks')}>Ver todas</span>
-          </div>
-          {recentTasks?.length === 0 && <div className="empty-state"><p>Nenhuma tarefa ainda</p></div>}
-          {recentTasks?.map(t => (
-            <div key={t.id} className="task-item">
-              <div className={`task-checkbox ${t.status === 'concluido' ? 'checked' : ''}`} />
-              <div className="task-content">
-                <div className={`task-title ${t.status === 'concluido' ? 'done' : ''}`}>{t.title}</div>
-                <div className="task-meta">
-                  {t.project && <span className="task-project">{t.project.name}</span>}
-                  <span className={`badge ${PRIORITY_CLASS[t.priority]}`}>{t.priority}</span>
+        {hasProjectAccess && (
+          <div className="card">
+            <div className="card-header">
+              <span className="card-title">
+                Projetos Recentes
+              </span>
+
+              <span
+                className="card-link"
+                onClick={() => navigate('/projects')}
+              >
+                Ver todos
+              </span>
+            </div>
+
+            {recentProjects.length === 0 && (
+              <div className="empty-state">
+                <p>Nenhum projeto ainda</p>
+              </div>
+            )}
+
+            {recentProjects.map(p => (
+              <div
+                key={p.id}
+                className="project-item"
+                onClick={() => navigate(`/projects/${p.id}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="project-item-header">
+                  <span className="project-name">
+                    {p.name}
+                  </span>
+
+                  <span className="project-pct">
+                    {p.progress}%
+                  </span>
+                </div>
+
+                <div className="project-meta">
+                  <span className="project-meta-item">
+                    <span className={`badge ${STATUS_CLASS[p.status]}`}>
+                      {STATUS_LABEL[p.status] || p.status}
+                    </span>
+                  </span>
+
+                  <span className="project-meta-item">
+                    <span
+                      className="material-symbols-outlined"
+                      style={{
+                        fontSize: 14,
+                        verticalAlign: 'middle',
+                        marginRight: 2
+                      }}
+                    >
+                      group
+                    </span>
+                    {p.memberCount}
+                  </span>
+
+                  {p.endDate && (
+                    <span className="project-meta-item">
+                      <span
+                        className="material-symbols-outlined"
+                        style={{
+                          fontSize: 14,
+                          verticalAlign: 'middle',
+                          marginRight: 2
+                        }}
+                      >
+                        schedule
+                      </span>
+                      {formatDateLocal(p.endDate, {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  )}
+                </div>
+
+                <div className="progress-bar">
+                  <div
+                    className={`progress-bar-fill ${progressColor(p.progress)}`}
+                    style={{ width: `${p.progress}%` }}
+                  />
                 </div>
               </div>
-              <span className={`badge ${STATUS_CLASS[t.status]}`} style={{ fontSize: 10.5, flexShrink: 0 }}>
+            ))}
+          </div>
+        )}
+
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">
+              Tarefas Recentes
+            </span>
+
+            <span
+              className="card-link"
+              onClick={() => navigate('/tasks')}
+            >
+              Ver todas
+            </span>
+          </div>
+
+          {recentTasks.length === 0 && (
+            <div className="empty-state">
+              <p>Nenhuma tarefa ainda</p>
+            </div>
+          )}
+
+          {recentTasks.map(t => (
+            <div key={t.id} className="task-item">
+              <div
+                className={`task-checkbox ${t.status === 'concluido' ? 'checked' : ''}`}
+              />
+
+              <div className="task-content">
+                <div
+                  className={`task-title ${t.status === 'concluido' ? 'done' : ''}`}
+                >
+                  {t.title}
+                </div>
+
+                <div className="task-meta">
+                  {t.project && (
+                    <span className="task-project">
+                      {t.project.name}
+                    </span>
+                  )}
+
+                  <span className={`badge ${PRIORITY_CLASS[t.priority]}`}>
+                    {t.priority}
+                  </span>
+                </div>
+              </div>
+
+              <span
+                className={`badge ${STATUS_CLASS[t.status]}`}
+                style={{ fontSize: 10.5, flexShrink: 0 }}
+              >
                 {STATUS_LABEL[t.status] || t.status}
               </span>
             </div>
@@ -170,73 +489,213 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ACTIVITY CHART + RECENT ACTIVITY */}
-      <div className="grid-2">
-        <div className="card" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-          <div className="card-header" style={{ position: 'sticky', top: '-20px', backgroundColor: 'var(--bg-card)', zIndex: 10, padding: '20px 0 15px 0', margin: '-20px 0 0 0', borderBottom: '1px solid var(--border-light)' }}>
-            <span className="card-title">Atividades da Semana</span>
-          </div>
-          <div className="tasks-this-week-list" style={{ marginTop: '20px' }}>
-            {tasksThisWeek?.length === 0 && (
-              <div className="empty-state">
-                <p>Nenhuma atividade programada para esta semana.</p>
-              </div>
-            )}
-            {tasksThisWeek?.map(t => (
-              <div key={t.id} className="task-item">
-                <div className={`task-checkbox ${t.status === 'concluido' ? 'checked' : ''}`} />
-                <div className="task-content">
-                  <div className={`task-title ${t.status === 'concluido' ? 'done' : ''}`}>{t.title}</div>
-                  <div className="task-meta" style={{ gap: '12px', marginTop: '6px' }}>
-                    {t.project && (
-                      <span className="task-project" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'var(--accent-blue)', fontWeight: 500, fontSize: '12px', backgroundColor: 'var(--accent-blue-dim)', padding: '2px 6px', borderRadius: '4px' }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>folder</span>
-                        {t.project.name}
+      {/* ATIVIDADES DA SEMANA E HISTÓRICO */}
+      {hasProjectAccess && (
+        <div className="grid-2">
+
+          <div
+            className="card"
+            style={{
+              maxHeight: '500px',
+              overflowY: 'auto'
+            }}
+          >
+            <div
+              className="card-header"
+              style={{
+                position: 'sticky',
+                top: '-20px',
+                backgroundColor: 'var(--bg-card)',
+                zIndex: 10,
+                padding: '20px 0 15px 0',
+                margin: '-20px 0 0 0',
+                borderBottom: '1px solid var(--border-light)'
+              }}
+            >
+              <span className="card-title">
+                Atividades da Semana
+              </span>
+            </div>
+
+            <div
+              className="tasks-this-week-list"
+              style={{ marginTop: '20px' }}
+            >
+              {tasksThisWeek.length === 0 && (
+                <div className="empty-state">
+                  <p>
+                    Nenhuma atividade programada para esta semana.
+                  </p>
+                </div>
+              )}
+
+              {tasksThisWeek.map(t => (
+                <div key={t.id} className="task-item">
+                  <div
+                    className={`task-checkbox ${t.status === 'concluido' ? 'checked' : ''}`}
+                  />
+
+                  <div className="task-content">
+                    <div
+                      className={`task-title ${t.status === 'concluido' ? 'done' : ''}`}
+                    >
+                      {t.title}
+                    </div>
+
+                    <div
+                      className="task-meta"
+                      style={{
+                        gap: '12px',
+                        marginTop: '6px'
+                      }}
+                    >
+                      {t.project && (
+                        <span
+                          className="task-project"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            color: 'var(--accent-blue)',
+                            fontWeight: 500,
+                            fontSize: '12px',
+                            backgroundColor: 'var(--accent-blue-dim)',
+                            padding: '2px 6px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: '13px' }}
+                          >
+                            folder
+                          </span>
+
+                          {t.project.name}
+                        </span>
+                      )}
+
+                      <span
+                        className="task-date"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          fontSize: '12.5px',
+                          ...getDateStyle(t.dueDate)
+                        }}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: '13px' }}
+                        >
+                          event
+                        </span>
+
+                        {formatDateLocal(t.dueDate, {
+                          day: '2-digit',
+                          month: 'short'
+                        })}
                       </span>
-                    )}
-                    <span className="task-date" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '12.5px', ...getDateStyle(t.dueDate) }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>event</span>
-                      {formatDateLocal(t.dueDate, { day: '2-digit', month: 'short' })}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '6px',
+                      flexShrink: 0
+                    }}
+                  >
+                    <span
+                      className={`badge ${PRIORITY_CLASS[t.priority] || 'badge-a_fazer'}`}
+                      style={{
+                        fontSize: 10.5,
+                        textTransform: 'capitalize'
+                      }}
+                    >
+                      {t.priority || 'Normal'}
+                    </span>
+
+                    <span
+                      className={`badge ${STATUS_CLASS[t.status]}`}
+                      style={{ fontSize: 10.5 }}
+                    >
+                      {STATUS_LABEL[t.status] || t.status}
                     </span>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                  <span className={`badge ${PRIORITY_CLASS[t.priority] || 'badge-a_fazer'}`} style={{ fontSize: 10.5, textTransform: 'capitalize' }}>
-                    {t.priority || 'Normal'}
-                  </span>
-                  <span className={`badge ${STATUS_CLASS[t.status]}`} style={{ fontSize: 10.5 }}>
-                    {STATUS_LABEL[t.status] || t.status}
-                  </span>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="card"
+            style={{
+              maxHeight: '500px',
+              overflowY: 'auto'
+            }}
+          >
+            <div
+              className="card-header"
+              style={{
+                position: 'sticky',
+                top: '-20px',
+                backgroundColor: 'var(--bg-card)',
+                zIndex: 10,
+                padding: '20px 0 15px 0',
+                margin: '-20px 0 0 0',
+                borderBottom: '1px solid var(--border-light)'
+              }}
+            >
+              <span className="card-title">
+                Histórico de Atividades
+              </span>
+            </div>
+
+            {recentActivities.length === 0 && (
+              <div
+                className="empty-state"
+                style={{ marginTop: '20px' }}
+              >
+                <p>
+                  Nenhuma atividade registrada nesta semana.
+                </p>
+              </div>
+            )}
+
+            {recentActivities.map(a => (
+              <div key={a.id} className="activity-item">
+                <div className="avatar sm">
+                  {a.user?.avatar || '?'}
+                </div>
+
+                <div>
+                  <div className="activity-text">
+                    <strong>
+                      {a.user?.name?.split(' ')[0]}
+                    </strong>{' '}
+
+                    {a.action}{' '}
+
+                    <strong>{a.target}</strong>
+
+                    {a.project && (
+                      <span>
+                        {' '}em <strong>{a.project.name}</strong>
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="activity-time">
+                    {timeAgo(a.createdAt)}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
-        <div className="card" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-          <div className="card-header" style={{ position: 'sticky', top: '-20px', backgroundColor: 'var(--bg-card)', zIndex: 10, padding: '20px 0 15px 0', margin: '-20px 0 0 0', borderBottom: '1px solid var(--border-light)' }}>
-            <span className="card-title">Histórico de Atividades</span>
-          </div>
-          {recentActivities?.length === 0 && (
-            <div className="empty-state" style={{ marginTop: '20px' }}>
-              <p>Nenhuma atividade registrada nesta semana.</p>
-            </div>
-          )}
-          {recentActivities?.map(a => (
-            <div key={a.id} className="activity-item">
-              <div className="avatar sm">{a.user?.avatar || '?'}</div>
-              <div>
-                <div className="activity-text">
-                  <strong>{a.user?.name?.split(' ')[0]}</strong> {a.action}{' '}
-                  <strong>{a.target}</strong>
-                  {a.project && <span> em <strong>{a.project.name}</strong></span>}
-                </div>
-                <div className="activity-time">{timeAgo(a.createdAt)}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </AppLayout>
   );
 }

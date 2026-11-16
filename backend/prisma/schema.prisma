@@ -104,6 +104,7 @@ model Task {
   status      String   @default("a_fazer")
   priority    String   @default("media")
   dueDate     DateTime?
+  completedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
