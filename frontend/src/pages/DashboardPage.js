@@ -75,9 +75,9 @@ export default function DashboardPage() {
       {/* CHUNKS DE CÁLCULO DE GRÁFICO */}
       {(() => {
         const chartData = [
-          { name: 'Concluído', value: 0, color: '#22c55e' },
-          { name: 'Em Andamento', value: 0, color: '#3b82f6' },
-          { name: 'A Fazer', value: 0, color: '#94a3b8' },
+          { name: 'Concluído', value: 0, color: 'var(--accent-green)' },
+          { name: 'Em Andamento', value: 0, color: 'var(--accent-blue)' },
+          { name: 'A Fazer', value: 0, color: 'var(--text-muted)' },
         ];
         (tasksThisWeek || []).forEach(t => {
           if (t.status === 'concluido') chartData[0].value++;

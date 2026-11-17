@@ -135,7 +135,7 @@ function ToggleRow({ label, desc, defaultOn }) {
           borderRadius: 12,
           cursor: "pointer",
           flexShrink: 0,
-          background: on ? "var(--accent-blue)" : "var(--border)",
+          background: on ? "var(--button-primary)" : "var(--border)",
           position: "relative",
           transition: "background 0.2s",
         }}

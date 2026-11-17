@@ -163,7 +163,7 @@ export default function UserProfile() {
       <div className="grid-2 profile-grid" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
         <div>
           <div className="card" style={{ textAlign: 'center', padding: 28 }}>
-            <div style={{ position: 'relative', width: 110, height: 110, margin: '0 auto 14px', borderRadius: '50%', overflow: 'hidden', background: 'linear-gradient(135deg,#3b82f6,#6366f1)', border: '3px solid rgba(59,130,246,0.18)', boxShadow: '0 12px 30px rgba(59,130,246,0.18)' }}>
+            <div style={{ position: 'relative', width: 110, height: 110, margin: '0 auto 14px', borderRadius: '50%', overflow: 'hidden', background: 'var(--avatar-gradient)', border: '3px solid rgba(59,130,246,0.18)', boxShadow: '0 12px 30px rgba(59,130,246,0.18)' }}>
               {getAvatarSource() ? (
                 <img
                   src={getAvatarSource()}
@@ -390,13 +390,13 @@ export default function UserProfile() {
       `}</style>
       <div style={{ position: 'fixed', top: 24, right: 24, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 9999 }}>
         {success && (
-          <div className="toast-animate" style={{ background: '#10b981', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="toast-animate" style={{ background: 'var(--success-solid)', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>check_circle</span>
             <span style={{ fontSize: 14, fontWeight: 500 }}>{success}</span>
           </div>
         )}
         {error && (
-          <div className="toast-animate" style={{ background: '#ef4444', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="toast-animate" style={{ background: 'var(--danger-solid)', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>error</span>
             <span style={{ fontSize: 14, fontWeight: 500 }}>{error}</span>
           </div>

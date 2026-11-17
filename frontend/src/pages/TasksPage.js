@@ -11,9 +11,9 @@ const STATUS_LABEL = { a_fazer: 'A Fazer', em_andamento: 'Em Andamento', conclui
 const STATUS_CLASS = { a_fazer: 'badge-a_fazer', em_andamento: 'badge-em_andamento', concluido: 'badge-concluido' };
 const PRIORITY_CLASS = { alta: 'badge-alta', media: 'badge-media', baixa: 'badge-baixa' };
 const COLUMNS = [
-  { key: 'a_fazer', label: 'A Fazer', color: '#94a3b8' },
-  { key: 'em_andamento', label: 'Em Andamento', color: '#3b82f6' },
-  { key: 'concluido', label: 'Concluído', color: '#22c55e' },
+  { key: 'a_fazer', label: 'A Fazer', color: 'var(--text-muted)' },
+  { key: 'em_andamento', label: 'Em Andamento', color: 'var(--accent-blue)' },
+  { key: 'concluido', label: 'Concluído', color: 'var(--accent-green)' },
 ];
 
 const emptyForm = { title: '', description: '', projectId: '', assigneeId: '', status: 'a_fazer', priority: 'media', dueDate: '' };
@@ -296,7 +296,7 @@ export default function TasksPage() {
                   <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
                     <span className={`badge ${PRIORITY_CLASS[t.priority]}`}>{t.priority}</span>
                     {t.project && <span style={{ fontSize: 11, color: 'var(--text-secondary)', background: 'var(--bg-input)', padding: '2px 7px', borderRadius: 4 }}>{t.project.name}</span>}
-                    {t.overdue && <span className="badge" style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>Atrasada</span>}
+                    {t.overdue && <span className="badge" style={{ background: 'var(--status-red-bg)', color: 'var(--accent-red)' }}>Atrasada</span>}
                   </div>
                   <div className="kanban-card-footer">
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>

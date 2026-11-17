@@ -83,7 +83,7 @@ export default function Topbar({ title, onMenuClick }) {
           onClick={() => navigate('/profile')}
           title="Perfil"
         >
-          <div className="avatar sm" style={{ overflow: 'hidden', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
+          <div className="avatar sm" style={{ overflow: 'hidden', background: 'var(--avatar-gradient)' }}>
             {avatarIsImage ? (
               <img src={user.avatar} alt={user.name || 'Usuário'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             ) : (
@@ -106,7 +106,7 @@ export default function Topbar({ title, onMenuClick }) {
                     await notificationsAPI.markAllAsRead();
                     loadNotifications();
                   }}
-                  style={{ fontSize: '12px', background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}
+                  style={{ fontSize: '12px', background: 'none', border: 'none', color: 'var(--accent-blue)', cursor: 'pointer' }}
                 >
                   Marcar todas como lidas
                 </button>
@@ -115,7 +115,7 @@ export default function Topbar({ title, onMenuClick }) {
             
             <div className="settings-item" style={{ flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto', alignItems: 'flex-start' }}>
               {notifications.length === 0 ? (
-                <span style={{ fontSize: '14px', color: '#888' }}>Nenhuma notificação.</span>
+                <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Nenhuma notificação.</span>
               ) : (
                 notifications.map(notif => {
                   const isDeadline = notif.content.toLowerCase().includes('prazo') || notif.content.toLowerCase().includes('encerra');
@@ -137,11 +137,11 @@ export default function Topbar({ title, onMenuClick }) {
                     }}
                     style={{ 
                       padding: '10px', 
-                      background: notif.isRead ? 'transparent' : (isDeadline ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-card)'), 
+                      background: notif.isRead ? 'transparent' : (isDeadline ? 'var(--status-amber-bg)' : 'var(--bg-card)'),
                       borderRadius: '6px', 
                       width: '100%', 
                       cursor: 'pointer',
-                      borderLeft: notif.isRead ? '3px solid transparent' : (isDeadline ? '3px solid #f59e0b' : '3px solid var(--primary)'),
+                      borderLeft: notif.isRead ? '3px solid transparent' : (isDeadline ? '3px solid var(--accent-amber)' : '3px solid var(--accent-blue)'),
                       opacity: notif.isRead ? 0.7 : 1,
                       transition: 'background 0.2s',
                       display: 'flex',
@@ -149,11 +149,11 @@ export default function Topbar({ title, onMenuClick }) {
                       alignItems: 'flex-start'
                     }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = isDeadline ? 'rgba(245, 158, 11, 0.2)' : 'var(--bg-input)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = notif.isRead ? 'transparent' : (isDeadline ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-card)'); }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = notif.isRead ? 'transparent' : (isDeadline ? 'var(--status-amber-bg)' : 'var(--bg-card)'); }}
                   >
                     <span className="material-symbols-outlined" style={{ 
                       fontSize: '20px', 
-                      color: isDeadline ? '#f59e0b' : 'var(--primary)',
+                      color: isDeadline ? 'var(--accent-amber)' : 'var(--accent-blue)',
                       marginTop: '2px'
                     }}>
                       {isDeadline ? 'alarm_on' : 'assignment_ind'}
@@ -162,12 +162,12 @@ export default function Topbar({ title, onMenuClick }) {
                       <div style={{ 
                         fontSize: '13px', 
                         marginBottom: '4px',
-                        color: isDeadline && !notif.isRead ? '#f59e0b' : 'var(--text-primary)',
+                        color: isDeadline && !notif.isRead ? 'var(--accent-amber)' : 'var(--text-primary)',
                         fontWeight: isDeadline && !notif.isRead ? 600 : 400
                       }}>
                         {notif.content}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#888' }}>{new Date(notif.createdAt).toLocaleString()}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date(notif.createdAt).toLocaleString()}</div>
                     </div>
                   </div>
                 )})

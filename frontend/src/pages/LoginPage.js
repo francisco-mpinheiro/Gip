@@ -282,7 +282,7 @@ function ForgotPassword({ onBack }) {
   return (
     <div>
       {err && <div style={css.errBox}>⚠ {err}</div>}
-      {msg && <div style={{ background: '#eef', padding: 8, borderRadius: 6 }}>{msg}</div>}
+      {msg && <div style={{ background: 'var(--status-blue-bg)', color: 'var(--text-primary)', padding: 8, borderRadius: 6 }}>{msg}</div>}
       <form onSubmit={handle} style={{ marginTop: 12 }}>
         <div style={css.fieldGroup}>
           <label style={css.label}>Email</label>
@@ -411,7 +411,7 @@ const css = {
   left: {
     flex: "1 1 55%",
     background:
-      "linear-gradient(145deg, #08101f 0%, #0b1628 50%, #0d1a30 100%)",
+      "var(--brand-panel)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -425,7 +425,7 @@ const css = {
     inset: 0,
     pointerEvents: "none",
     background: `radial-gradient(ellipse at 15% 25%, rgba(59,130,246,0.14) 0%, transparent 55%),
-                 radial-gradient(ellipse at 85% 75%, rgba(139,92,246,0.09) 0%, transparent 50%),
+                 radial-gradient(ellipse at 85% 75%, rgba(90,125,185,0.06) 0%, transparent 50%),
                  radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.04) 0%, transparent 70%)`,
   },
   leftContent: {
@@ -441,9 +441,10 @@ const css = {
     marginBottom: 44,
   },
   logoBox: {
+    color: "#fff",
     width: 46,
     height: 46,
-    background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+    background: "linear-gradient(145deg, #3979ef, #2456c0)",
     borderRadius: 12,
     display: "flex",
     alignItems: "center",
@@ -468,7 +469,7 @@ const css = {
   },
   desc: {
     fontSize: 18,
-    color: "#94a3b8",
+    color: "#b6c1d2",
     lineHeight: 1.6,
     marginBottom: 48,
     maxWidth: 540,
@@ -482,6 +483,7 @@ const css = {
   },
   feat: { display: "flex", alignItems: "flex-start", gap: 16 },
   featIcon: {
+    color: "#b6c1d2",
     width: 44,
     height: 44,
     flexShrink: 0,
@@ -499,7 +501,7 @@ const css = {
     color: "#e2e8f0",
     marginBottom: 2,
   },
-  featDesc: { fontSize: 13.5, color: "#64748b", lineHeight: 1.45 },
+  featDesc: { fontSize: 13.5, color: "#a4b0c3", lineHeight: 1.45 },
 
   stats: { display: "flex", gap: 32, position: "relative", zIndex: 1 },
   stat: {},
@@ -509,13 +511,13 @@ const css = {
     color: "#f1f5f9",
     letterSpacing: "-0.02em",
   },
-  statLabel: { fontSize: 11.5, color: "#64748b", marginTop: 2 },
+  statLabel: { fontSize: 11.5, color: "#a4b0c3", marginTop: 2 },
 
   /* RIGHT */
   right: {
     flex: "0 0 45%",
-    background: "#0a0f1c",
-    borderLeft: "1px solid rgba(255,255,255,0.05)",
+    background: "var(--bg-primary)",
+    borderLeft: "1px solid var(--border-light)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -527,34 +529,34 @@ const css = {
   cardIcon: {
     width: 54,
     height: 54,
-    background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+    background: "linear-gradient(145deg, #3979ef, #2456c0)",
     borderRadius: 14,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: 22,
     color: "#fff",
-    boxShadow: "0 8px 28px rgba(59,130,246,0.35)",
+    boxShadow: "0 6px 20px rgba(40,100,219,0.22)",
   },
   cardTitle: {
     fontSize: 22,
     fontWeight: 800,
-    color: "#f1f5f9",
+    color: "var(--text-primary)",
     textAlign: "center",
     letterSpacing: "-0.02em",
     marginBottom: 4,
   },
   cardSub: {
     fontSize: 13,
-    color: "#64748b",
+    color: "var(--text-muted)",
     textAlign: "center",
     marginBottom: 18,
   },
 
   tabs: {
     display: "flex",
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.07)",
+    background: "var(--bg-input)",
+    border: "1px solid var(--border)",
     borderRadius: 10,
     padding: 4,
     gap: 4,
@@ -566,16 +568,16 @@ const css = {
     borderRadius: 7,
     border: "none",
     background: "transparent",
-    color: "#64748b",
+    color: "var(--text-muted)",
     fontSize: 13,
     fontWeight: 600,
     cursor: "pointer",
     transition: "all 0.18s",
   },
   tabOn: {
-    background: "#1c2230",
-    color: "#f1f5f9",
-    boxShadow: "0 1px 6px rgba(0,0,0,0.5)",
+    background: "var(--bg-card)",
+    color: "var(--text-primary)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   errBox: {
@@ -583,17 +585,17 @@ const css = {
     border: "1px solid rgba(239,68,68,0.22)",
     borderRadius: 8,
     padding: "9px 13px",
-    fontSize: 12.5,
-    color: "#f87171",
+    fontSize: 13,
+    color: "var(--accent-red)",
     marginBottom: 14,
   },
 
   fieldGroup: { marginBottom: 12 },
   label: {
     display: "block",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 600,
-    color: "#94a3b8",
+    color: "var(--text-secondary)",
     marginBottom: 5,
   },
   inputWrap: { position: "relative" },
@@ -603,17 +605,17 @@ const css = {
     top: "50%",
     transform: "translateY(-50%)",
     fontSize: 14,
-    color: "#4a5568",
+    color: "var(--text-muted)",
     pointerEvents: "none",
   },
   input: {
     width: "100%",
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.09)",
+    background: "var(--bg-input)",
+    border: "1px solid var(--border)",
     borderRadius: 9,
     padding: "10px 38px 10px 36px",
-    color: "#f1f5f9",
-    fontSize: 13.5,
+    color: "var(--text-primary)",
+    fontSize: 14,
     outline: "none",
     transition: "border-color 0.2s",
     fontFamily: "inherit",
@@ -628,7 +630,7 @@ const css = {
     fontSize: 14,
     cursor: "pointer",
     padding: 4,
-    color: "#4a5568",
+    color: "var(--text-muted)",
   },
 
   remRow: {
@@ -641,13 +643,13 @@ const css = {
   remLabel: {
     display: "flex",
     alignItems: "center",
-    fontSize: 12.5,
-    color: "#64748b",
+    fontSize: 13,
+    color: "var(--text-muted)",
     cursor: "pointer",
   },
   forgot: {
-    fontSize: 12.5,
-    color: "#3b82f6",
+    fontSize: 13,
+    color: "var(--accent-blue)",
     fontWeight: 600,
     cursor: "pointer",
   },
@@ -655,7 +657,7 @@ const css = {
   submitBtn: {
     width: "100%",
     padding: "11px",
-    background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+    background: "var(--button-primary)",
     border: "none",
     borderRadius: 9,
     color: "#fff",
@@ -663,30 +665,30 @@ const css = {
     fontWeight: 700,
     cursor: "pointer",
     transition: "opacity 0.2s",
-    boxShadow: "0 4px 16px rgba(59,130,246,0.3)",
+    boxShadow: "0 3px 10px rgba(40,100,219,0.18)",
     marginBottom: 12,
     fontFamily: "inherit",
   },
 
   switchLine: {
     textAlign: "center",
-    fontSize: 12.5,
-    color: "#64748b",
+    fontSize: 13,
+    color: "var(--text-muted)",
     marginBottom: 4,
   },
-  switchLink: { color: "#3b82f6", fontWeight: 600, cursor: "pointer" },
+  switchLink: { color: "var(--accent-blue)", fontWeight: 600, cursor: "pointer" },
 
   demo: {
     marginTop: 16,
     padding: "12px 14px",
-    background: "rgba(59,130,246,0.05)",
-    border: "1px solid rgba(59,130,246,0.12)",
+    background: "var(--accent-blue-dim)",
+    border: "1px solid var(--border)",
     borderRadius: 10,
   },
   demoHead: {
     fontSize: 10.5,
     fontWeight: 700,
-    color: "#64748b",
+    color: "var(--text-muted)",
     marginBottom: 8,
     textTransform: "uppercase",
     letterSpacing: "0.06em",
@@ -706,7 +708,7 @@ const css = {
     fontFamily: "inherit",
   },
   demoDot: { width: 7, height: 7, borderRadius: "50%", flexShrink: 0 },
-  demoRole: { fontSize: 11.5, color: "#64748b", width: 110, flexShrink: 0 },
-  demoEmail: { fontSize: 11.5, color: "#3b82f6", fontWeight: 500 },
-  demoNote: { fontSize: 10.5, color: "#4a5568", marginTop: 7 },
+  demoRole: { fontSize: 11.5, color: "var(--text-muted)", width: 110, flexShrink: 0 },
+  demoEmail: { fontSize: 11.5, color: "var(--accent-blue)", fontWeight: 500 },
+  demoNote: { fontSize: 10.5, color: "var(--text-muted)", marginTop: 7 },
 };

@@ -5,10 +5,10 @@ import { useAuth, ROLE_LABELS } from "../context/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 function barColor(rate) {
-  if (rate >= 75) return "#22c55e";
-  if (rate >= 45) return "#3b82f6";
-  if (rate >= 20) return "#f59e0b";
-  return "#ef4444";
+  if (rate >= 75) return "var(--accent-green)";
+  if (rate >= 45) return "var(--accent-blue)";
+  if (rate >= 20) return "var(--accent-amber)";
+  return "var(--accent-red)";
 }
 
 function medalBg(idx) {
@@ -110,11 +110,11 @@ export default function PerformancePage() {
               gap: 8,
               padding: "6px 14px",
               borderRadius: 20,
-              background: "rgba(59,130,246,0.1)",
+              background: "var(--accent-blue-dim)",
               border: "1px solid rgba(59,130,246,0.2)",
               fontSize: 12,
               fontWeight: 600,
-              color: "#60a5fa",
+              color: "var(--accent-blue)",
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: 'middle', marginRight: 4 }}>{isEmployee ? 'person' : 'group'}</span> {result?.scope}
@@ -225,7 +225,7 @@ export default function PerformancePage() {
                       padding: "12px 14px",
                       borderRadius: 10,
                       background: item.isMe
-                        ? "rgba(59,130,246,0.07)"
+                        ? "var(--accent-blue-dim)"
                         : "rgba(255,255,255,0.02)",
                       border: `1px solid ${item.isMe ? "rgba(59,130,246,0.25)" : "transparent"}`,
                       transition: "all 0.2s",
@@ -273,9 +273,9 @@ export default function PerformancePage() {
                                 style={{
                                   fontSize: 10.5,
                                   fontWeight: 600,
-                                  color: "#60a5fa",
+                                  color: "var(--accent-blue)",
                                   marginLeft: 8,
-                                  background: "rgba(59,130,246,0.15)",
+                                  background: "var(--accent-blue-dim)",
                                   padding: "1px 7px",
                                   borderRadius: 10,
                                 }}
@@ -424,8 +424,8 @@ export default function PerformancePage() {
                                   <span
                                     style={{
                                       fontSize: 10,
-                                      color: "#60a5fa",
-                                      background: "rgba(59,130,246,0.15)",
+                                      color: "var(--accent-blue)",
+                                      background: "var(--accent-blue-dim)",
                                       padding: "1px 6px",
                                       borderRadius: 8,
                                       fontWeight: 700,
@@ -639,7 +639,7 @@ function MyPerformanceCard({ data }) {
             style={{
               height: "100%",
               borderRadius: 6,
-              background: `linear-gradient(90deg, ${color}, ${color}88)`,
+              background: `linear-gradient(90deg, ${color}, color-mix(in srgb, ${color} 55%, transparent))`,
               width: `${data.completionRate}%`,
               transition: "width 0.8s ease",
             }}
@@ -709,7 +709,7 @@ function MyPerformanceCard({ data }) {
             border: "1px solid rgba(239,68,68,0.2)",
             borderRadius: 8,
             fontSize: 13,
-            color: "#f87171",
+            color: "var(--accent-red)",
             display: "flex",
             alignItems: "center",
             gap: 8,

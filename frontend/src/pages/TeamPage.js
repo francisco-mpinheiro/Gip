@@ -6,8 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import UserDrawer from '../components/UserDrawer';
 
 const DEPT_COLORS = {
-  'TI': '#3b82f6', 'Desenvolvimento': '#8b5cf6', 'Design': '#ec4899',
-  'QA': '#f59e0b', 'Diretoria': '#10b981', 'Geral': '#94a3b8',
+  'TI': 'var(--accent-blue)', 'Desenvolvimento': 'var(--accent-purple)', 'Design': 'var(--accent-pink)',
+  'QA': 'var(--accent-amber)', 'Diretoria': 'var(--accent-green)', 'Geral': 'var(--text-muted)',
 };
 
 export default function TeamPage() {
@@ -75,7 +75,7 @@ export default function TeamPage() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {departments.map(dept => {
           const count = users.filter(u => u.department === dept && u.active).length;
-          const color = DEPT_COLORS[dept] || '#94a3b8';
+          const color = DEPT_COLORS[dept] || 'var(--text-muted)';
           return (
             <div
               key={dept}
@@ -116,7 +116,7 @@ export default function TeamPage() {
             members.length > 0 && (
               <div key={dept} style={{ marginBottom: 28 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: DEPT_COLORS[dept] || '#94a3b8', display: 'inline-block' }} />
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: DEPT_COLORS[dept] || 'var(--text-muted)', display: 'inline-block' }} />
                   <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{dept}</h3>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>({members.length})</span>
                 </div>
@@ -151,7 +151,7 @@ export default function TeamPage() {
                     </td>
                     <td><span style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{ROLE_LABELS[u.role]}</span></td>
                     <td>
-                      <span style={{ fontSize: 12, color: DEPT_COLORS[u.department] || '#94a3b8', fontWeight: 600 }}>
+                      <span style={{ fontSize: 12, color: DEPT_COLORS[u.department] || 'var(--text-muted)', fontWeight: 600 }}>
                         {u.department}
                       </span>
                     </td>
@@ -182,7 +182,7 @@ export default function TeamPage() {
 function MemberCard({ user, onClick }) {
   return (
     <div className="team-card" onClick={onClick} style={{ cursor: 'pointer' }}>
-      <div className="avatar lg" style={{ overflow: 'hidden', background: user.active ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : 'var(--bg-input)' }}>
+      <div className="avatar lg" style={{ overflow: 'hidden', background: user.active ? 'var(--avatar-gradient)' : 'var(--bg-input)' }}>
         {user.avatar?.startsWith('/uploads/') ? <img src={user.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : user.avatar}
       </div>
       <div className="team-info">

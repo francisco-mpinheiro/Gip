@@ -25,10 +25,10 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 480, margin: '40px auto' }}>
+    <div className="reset-password-page" style={{ padding: 24, maxWidth: 480, margin: '40px auto' }}>
       <h2>Redefinir Senha</h2>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      {success && <div style={{ color: 'green' }}>{success}</div>}
+      {error && <div style={{ color: 'var(--accent-red)' }}>{error}</div>}
+      {success && <div style={{ color: 'var(--accent-green)' }}>{success}</div>}
       <form onSubmit={handleReset}>
         <div style={{ marginTop: 12 }}>
           <label>Nova Senha</label>

@@ -73,8 +73,8 @@ export default function UsersPage() {
   });
 
   const roleColor = {
-    admin_platform: '#ef4444', admin_company: '#f59e0b',
-    manager_area: '#8b5cf6', project_manager: '#3b82f6', employee: '#22c55e',
+    admin_platform: 'var(--accent-red)', admin_company: 'var(--accent-amber)',
+    manager_area: 'var(--accent-purple)', project_manager: 'var(--accent-blue)', employee: 'var(--accent-green)',
   };
 
   return (
@@ -157,7 +157,7 @@ export default function UsersPage() {
                       <span style={{
                         fontSize: 11.5, fontWeight: 600,
                         color: roleColor[u.role],
-                        background: `${roleColor[u.role]}22`,
+                        background: `color-mix(in srgb, ${roleColor[u.role]} 12%, transparent)`,
                         padding: '3px 8px', borderRadius: 5,
                       }}>
                         {ROLE_LABELS[u.role]}

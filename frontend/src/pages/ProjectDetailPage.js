@@ -10,9 +10,9 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const COLUMNS = [
-  { key: 'a_fazer', label: 'A Fazer', color: '#94a3b8' },
-  { key: 'em_andamento', label: 'Em Andamento', color: '#3b82f6' },
-  { key: 'concluido', label: 'Concluído', color: '#22c55e' },
+  { key: 'a_fazer', label: 'A Fazer', color: 'var(--text-muted)' },
+  { key: 'em_andamento', label: 'Em Andamento', color: 'var(--accent-blue)' },
+  { key: 'concluido', label: 'Concluído', color: 'var(--accent-green)' },
 ];
 const PRIORITY_CLASS = { alta: 'badge-alta', media: 'badge-media', baixa: 'badge-baixa' };
 const emptyTask = { title: '', description: '', assigneeId: '', priority: 'media', dueDate: '' };
@@ -300,7 +300,7 @@ export default function ProjectDetailPage() {
                     )}
                     <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                       <span className={`badge ${PRIORITY_CLASS[task.priority]}`}>{task.priority}</span>
-                      {overdue && <span className="badge" style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>Atrasada</span>}
+                      {overdue && <span className="badge" style={{ background: 'var(--status-red-bg)', color: 'var(--accent-red)' }}>Atrasada</span>}
                     </div>
                     <div className="kanban-card-footer">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -419,7 +419,7 @@ export default function ProjectDetailPage() {
       `}</style>
       <div style={{ position: 'fixed', top: 24, right: 24, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 9999 }}>
         {taskError && (
-          <div className="toast-animate" style={{ background: '#ef4444', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="toast-animate" style={{ background: 'var(--danger-solid)', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>error</span>
             <span style={{ fontSize: 14, fontWeight: 500 }}>{taskError}</span>
           </div>

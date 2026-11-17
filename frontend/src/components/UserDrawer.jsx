@@ -118,7 +118,7 @@ export default function UserDrawer({ userId, onClose }) {
           margin-bottom: 8px; font-size: 14px; line-height: 1.4;
         }
         .chat-bubble.mine {
-          background: var(--accent-blue); color: #fff;
+          background: var(--button-primary); color: #fff;
           align-self: flex-end; border-bottom-right-radius: 4px;
         }
         .chat-bubble.other {
@@ -137,7 +137,7 @@ export default function UserDrawer({ userId, onClose }) {
         }
         .chat-input-area input:focus { border-color: var(--accent-blue); }
         .chat-input-area button {
-          background: var(--accent-blue); color: #fff; border: none;
+          background: var(--button-primary); color: #fff; border: none;
           width: 40px; height: 40px; border-radius: 50%; display: flex;
           align-items: center; justify-content: center; cursor: pointer;
         }
@@ -148,7 +148,7 @@ export default function UserDrawer({ userId, onClose }) {
         <div className="drawer" onClick={e => e.stopPropagation()}>
           <div className="drawer-header">
             <button className="drawer-close" onClick={onClose}>✕</button>
-            <div className="avatar xl" style={{ background: targetUser.active ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : 'var(--bg-input)' }}>
+            <div className="avatar xl" style={{ background: targetUser.active ? 'var(--avatar-gradient)' : 'var(--bg-input)' }}>
               {targetUser.avatar}
             </div>
             <div>
@@ -209,7 +209,7 @@ export default function UserDrawer({ userId, onClose }) {
           
           {activeTab === 'chat' && (
             <>
-              <div className="drawer-content" style={{ padding: 16, background: 'var(--bg-body)' }}>
+              <div className="drawer-content" style={{ padding: 16, background: 'var(--bg-primary)' }}>
                 {messages.length === 0 ? (
                   <div style={{ margin: 'auto', color: 'var(--text-secondary)', fontSize: 13, textAlign: 'center' }}>
                     Nenhuma mensagem ainda.<br/>Envie um "Olá" para {targetUser.name.split(' ')[0]}!
