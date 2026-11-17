@@ -46,6 +46,7 @@ export default function TasksPage() {
   const [filterPriority, setFilterPriority] = useState('');
   const [filterMine, setFilterMine] = useState(false);
   const [dragging, setDragging] = useState(null);
+  const [actionError, setActionError] = useState('');
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
@@ -159,16 +160,19 @@ export default function TasksPage() {
   };
 
   const handleStatusChange = async (id, status) => {
-    await tasksAPI.updateStatus(id, status);
-    load();
+    try {
+      setActionError('');
+      await tasksAPI.updateStatus(id, status);
+      load();
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Não foi possível alterar o status. Tente novamente.');
+    }
   };
 
   const handleDrop = async (col) => {
-    if (dragging && dragging.status !== col) {
-      await tasksAPI.updateStatus(dragging.id, col);
-      load();
-    }
-    setDragging(null);
+    try {
+      if (dragging && dragging.status !== col) await handleStatusChange(dragging.id, col);
+    } finally { setDragging(null); }
   };
 
   const filtered = tasks.filter(t => {
@@ -258,6 +262,8 @@ export default function TasksPage() {
           Minhas Tarefas
         </button>
       </div>
+
+      {actionError && <div role="alert" className="task-workflow-error">{actionError}</div>}
 
       {createdOnFilter && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, padding: '10px 12px', background: 'var(--accent-blue-dim)', border: '1px solid var(--border)', borderRadius: 6 }}>

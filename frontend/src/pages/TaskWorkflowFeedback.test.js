@@ -1,0 +1,27 @@
+import React, { act } from 'react';
+import { createRoot } from 'react-dom/client';
+import TasksPage from './TasksPage';
+import ProjectDetailPage from './ProjectDetailPage';
+import { tasksAPI, projectsAPI, usersAPI } from '../utils/api';
+jest.mock('../components/layout/AppLayout',()=>({children})=><div>{children}</div>);
+jest.mock('../components/project-tools/ProjectToolsPanel',()=>()=>null);
+jest.mock('jspdf',()=>jest.fn());
+jest.mock('jspdf-autotable',()=>jest.fn());
+jest.mock('../context/AuthContext',()=>({useAuth:()=>({user:{id:'u',role:'admin_company'},canDo:()=>true})}));
+jest.mock('react-router-dom',()=>({useNavigate:()=>jest.fn(),useParams:()=>({id:'p'}),useSearchParams:()=>[new URLSearchParams(),jest.fn()]}));
+jest.mock('../utils/api',()=>({tasksAPI:{getAll:jest.fn(),updateStatus:jest.fn()},projectsAPI:{getAll:jest.fn(),getById:jest.fn()},usersAPI:{getAll:jest.fn()}}));
+const task={id:'t',projectId:'p',title:'Entrega bloqueada',status:'a_fazer',priority:'media',attachments:[],assigneeId:'u',assignee:{id:'u',name:'Usuário',avatar:'U'}};
+const project={id:'p',name:'Projeto',managerId:'u',members:[],tasks:[task],progress:0};
+let root,host;
+beforeEach(()=>{global.IS_REACT_ACT_ENVIRONMENT=true;host=document.createElement('div');document.body.appendChild(host);root=createRoot(host);tasksAPI.getAll.mockResolvedValue({data:[task]});projectsAPI.getAll.mockResolvedValue({data:[project]});projectsAPI.getById.mockResolvedValue({data:project});usersAPI.getAll.mockResolvedValue({data:[]});tasksAPI.updateStatus.mockRejectedValue({response:{status:409,data:{message:'Resolva dependências antes de concluir a tarefa'}}});});
+afterEach(()=>{act(()=>root.unmount());host.remove();jest.clearAllMocks();});
+test.each([['projeto',ProjectDetailPage],['geral',TasksPage]])('Kanban %s explica bloqueio e limpa o arraste',async(name,Page)=>{
+ await act(async()=>root.render(<Page/>));
+ if(name==='geral')act(()=>Array.from(host.querySelectorAll('button')).find(button=>button.textContent.includes('Kanban')).click());
+ act(()=>host.querySelector('.kanban-card').dispatchEvent(new Event('dragstart',{bubbles:true})));
+ await act(async()=>host.querySelectorAll('.kanban-col')[2].dispatchEvent(new Event('drop',{bubbles:true,cancelable:true})));
+ expect(tasksAPI.updateStatus).toHaveBeenCalledWith('t','concluido');
+ expect(host.querySelector('[role="alert"]').textContent).toContain('Resolva dependências');
+ await act(async()=>host.querySelectorAll('.kanban-col')[1].dispatchEvent(new Event('drop',{bubbles:true,cancelable:true})));
+ expect(tasksAPI.updateStatus).toHaveBeenCalledTimes(1);
+});

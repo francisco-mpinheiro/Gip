@@ -5,6 +5,7 @@ import { ROLE_LABELS } from '../context/AuthContext';
 import { useAuth } from '../context/AuthContext';
 import UserDrawer from '../components/UserDrawer';
 import MemberInsights, { EducationTags, WorkloadBadge } from '../components/MemberInsights';
+import DepartmentRequestsPanel from '../components/project-tools/DepartmentRequestsPanel';
 
 const DEPT_COLORS = {
   'TI': 'var(--accent-blue)', 'Desenvolvimento': 'var(--accent-purple)', 'Design': 'var(--accent-pink)',
@@ -176,6 +177,8 @@ export default function TeamPage() {
           </div>
         </div>
       )}
+
+      <DepartmentRequestsPanel />
 
       {selectedUserId && (
         <UserDrawer userId={selectedUserId} onClose={() => setSelectedUserId(null)} />

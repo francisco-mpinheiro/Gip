@@ -51,6 +51,14 @@ model User {
   attachments     TaskAttachment[]
   educations      Education[]
 
+  projectIssues ProjectIssue[]
+  createdDependencies TaskDependency[]
+  submittedReviews TaskReview[] @relation("ReviewAuthor")
+  reviewedSubmissions TaskReview[] @relation("ReviewReviewer")
+  checkIns ProjectCheckIn[]
+  projectNotes ProjectNote[]
+  departmentRequests DepartmentRequest[]
+
   sentMessages    Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
@@ -94,6 +102,13 @@ model Project {
   activities  Activity[]
   notifications Notification[]
 
+  issues ProjectIssue[]
+  dependencies TaskDependency[]
+  reviews TaskReview[]
+  checkIns ProjectCheckIn[]
+  notes ProjectNote[]
+  departmentRequests DepartmentRequest[]
+
   @@map("projects")
 }
 
@@ -118,6 +133,11 @@ model Task {
   comments    Comment[]
   notifications Notification[]
   attachments   TaskAttachment[]
+
+  issues ProjectIssue[]
+  dependencies TaskDependency[] @relation("TaskDependencies")
+  dependents TaskDependency[] @relation("TaskDependents")
+  reviews TaskReview[]
 
   @@map("tasks")
 }
@@ -203,4 +223,108 @@ model Message {
 
   @@index([senderId, receiverId, createdAt])
   @@map("messages")
+}
+
+model ProjectIssue {
+  id String @id @default(uuid())
+  projectId String
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId String?
+  task Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId String
+  author User @relation(fields: [authorId], references: [id])
+  title String
+  reason String
+  status String @default("open")
+  resolution String?
+  resolvedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([projectId, status])
+  @@map("project_issues")
+}
+
+model TaskDependency {
+  id String @id @default(uuid())
+  projectId String
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId String
+  task Task @relation("TaskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOnId String
+  dependsOn Task @relation("TaskDependents", fields: [dependsOnId], references: [id], onDelete: Cascade)
+  authorId String
+  author User @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  @@unique([taskId, dependsOnId])
+  @@index([projectId])
+  @@map("task_dependencies")
+}
+
+model TaskReview {
+  id String @id @default(uuid())
+  projectId String
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId String
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId String
+  author User @relation("ReviewAuthor", fields: [authorId], references: [id])
+  reviewerId String?
+  reviewer User? @relation("ReviewReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+  summary String
+  evidence String?
+  status String @default("pending")
+  feedback String?
+  reviewedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([projectId, status])
+  @@index([taskId, createdAt])
+  @@map("task_reviews")
+}
+
+model ProjectCheckIn {
+  id String @id @default(uuid())
+  projectId String
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId String
+  author User @relation(fields: [authorId], references: [id])
+  day String
+  completed String
+  nextStep String
+  needsHelp String?
+  createdAt DateTime @default(now())
+  @@unique([projectId, authorId, day])
+  @@map("project_check_ins")
+}
+
+model ProjectNote {
+  id String @id @default(uuid())
+  projectId String
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId String
+  author User @relation(fields: [authorId], references: [id])
+  kind String
+  title String
+  content String
+  createdAt DateTime @default(now())
+  @@index([projectId, kind])
+  @@map("project_notes")
+}
+
+model DepartmentRequest {
+  id String @id @default(uuid())
+  projectId String
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId String
+  author User @relation(fields: [authorId], references: [id])
+  fromDepartment String
+  toDepartment String
+  title String
+  description String
+  priority String @default("media")
+  status String @default("open")
+  resolution String?
+  resolvedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([projectId, status])
+  @@index([toDepartment, status])
+  @@map("department_requests")
 }

@@ -27,6 +27,8 @@ router.put('/users/:id', authenticate, authorize(...ADMIN_ROLES), usersCtrl.upda
 router.patch('/users/:id/toggle', authenticate, authorize(...ADMIN_ROLES), usersCtrl.toggleActive);
 router.delete('/users/:id', authenticate, authorize(ROLES.ADMIN_PLATFORM), usersCtrl.delete);
 
+router.use(require('./projectTools'));
+
 // ─── PROJECTS ────────────────────────────────────────────────────────────────
 router.get('/projects', authenticate, projectsCtrl.getAll);
 router.get('/projects/:id', authenticate, projectsCtrl.getById);

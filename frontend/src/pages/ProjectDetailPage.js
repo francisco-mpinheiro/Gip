@@ -7,6 +7,7 @@ import { formatDateLocal } from '../utils/dateUtils';
 import { rankMembersForTask } from '../utils/smartAssign';
 import SmartAssignRecommendations from '../components/SmartAssignRecommendations';
 import { TaskCardAssignee, TaskCardCounts } from '../components/TaskCardContext';
+import ProjectToolsPanel from '../components/project-tools/ProjectToolsPanel';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -47,6 +48,12 @@ export default function ProjectDetailPage() {
 
   useEffect(load, [load]);
 
+  useEffect(() => {
+    if (!taskError) return undefined;
+    const timeout = setTimeout(() => setTaskError(''), 6000);
+    return () => clearTimeout(timeout);
+  }, [taskError]);
+
   const openCreateTask = () => { setEditingTask(null); setTaskForm(emptyTask); setTaskError(""); setShowRecommendations(false); setTaskModal(true); };
   const openEditTask = (t) => {
     setEditingTask(t);
@@ -74,7 +81,6 @@ export default function ProjectDetailPage() {
       load();
     } catch (err) {
       setTaskError(err.response?.data?.message || 'Erro ao salvar tarefa');
-      setTimeout(() => setTaskError(""), 4000);
     } finally {
       setSaving(false);
     }
@@ -89,12 +95,18 @@ export default function ProjectDetailPage() {
   const handleDragStart = (task) => setDragging(task);
   const handleDragOver = (col, e) => { e.preventDefault(); setDragOver(col); };
   const handleDrop = async (col) => {
-    if (dragging && dragging.status !== col) {
-      await tasksAPI.updateStatus(dragging.id, col);
-      load();
+    try {
+      setTaskError('');
+      if (dragging && dragging.status !== col) {
+        await tasksAPI.updateStatus(dragging.id, col);
+        load();
+      }
+    } catch (err) {
+      setTaskError(err.response?.data?.message || 'Não foi possível mover a tarefa. Tente novamente.');
+    } finally {
+      setDragging(null);
+      setDragOver(null);
     }
-    setDragging(null);
-    setDragOver(null);
   };
 
   if (loading) return <AppLayout><div className="loading"><div className="spinner" />Carregando...</div></AppLayout>;
@@ -332,6 +344,8 @@ export default function ProjectDetailPage() {
         })}
       </div>
 
+      <ProjectToolsPanel projectId={id} onChange={load} refreshKey={project.tasks} />
+
       {/* TASK MODAL */}
       {taskModal && (
         <div className="modal-overlay" onClick={() => setTaskModal(false)}>
@@ -419,7 +433,7 @@ export default function ProjectDetailPage() {
       `}</style>
       <div style={{ position: 'fixed', top: 24, right: 24, display: 'flex', flexDirection: 'column', gap: 10, zIndex: 9999 }}>
         {taskError && (
-          <div className="toast-animate" style={{ background: 'var(--danger-solid)', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div role="alert" className="toast-animate" style={{ background: 'var(--danger-solid)', color: '#fff', padding: '12px 20px', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>error</span>
             <span style={{ fontSize: 14, fontWeight: 500 }}>{taskError}</span>
           </div>

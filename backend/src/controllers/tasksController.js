@@ -1,9 +1,9 @@
-const { v4: uuidv4 } = require('uuid');
 const { ROLES } = require('../config/database');
 const prisma = require('../config/prisma');
+const { loadProject, projectTransaction, requireTask, canEditTask, assertCanComplete, recalcProgress: recalcProjectProgress, notifyDependents, httpError, sendError } = require('../services/projectToolsPolicy');
 
-async function checkImmediateDeadline(task) {
-  if (!task.dueDate || !task.assigneeId || task.status === 'concluida') return;
+async function checkImmediateDeadline(task, db = prisma) {
+  if (!task.dueDate || !task.assigneeId || ['concluido', 'cancelado'].includes(task.status)) return;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -16,34 +16,21 @@ async function checkImmediateDeadline(task) {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays === 2) {
-    await prisma.notification.create({
+    await db.notification.create({
       data: { content: `O prazo da tarefa "${task.title}" se encerra em 2 dias.`, userId: task.assigneeId, taskId: task.id, projectId: task.projectId }
     });
   } else if (diffDays === 1) {
-    await prisma.notification.create({
+    await db.notification.create({
       data: { content: `O prazo da tarefa "${task.title}" se encerra amanhã!`, userId: task.assigneeId, taskId: task.id, projectId: task.projectId }
     });
   } else if (diffDays === 0) {
-    await prisma.notification.create({
+    await db.notification.create({
       data: { content: `Atenção: O prazo da tarefa "${task.title}" se encerra HOJE!`, userId: task.assigneeId, taskId: task.id, projectId: task.projectId }
     });
   }
 }
 
-const recalcProgress = async (projectId) => {
-  try {
-    const tasks = await prisma.task.findMany({ where: { projectId } });
-    if (tasks.length === 0) {
-      await prisma.project.update({ where: { id: projectId }, data: { progress: 0 } });
-      return;
-    }
-    const done = tasks.filter(t => t.status === 'concluido').length;
-    const progress = Math.round((done / tasks.length) * 100);
-    await prisma.project.update({ where: { id: projectId }, data: { progress } });
-  } catch (err) {
-    console.error('Failed to recalc progress', err);
-  }
-};
+const recalcProgress = (projectId) => recalcProjectProgress(prisma, projectId);
 
 // GET /api/tasks
 exports.getAll = async (req, res) => {
@@ -104,177 +91,93 @@ exports.getById = async (req, res) => {
   }
 };
 
+const VALID_TASK_STATUSES = ['a_fazer', 'em_andamento', 'concluido', 'cancelado'];
+
+function validateDueDate(value, project) {
+  if (!value) return null;
+  const due = new Date(value);
+  if (Number.isNaN(due.getTime())) throw httpError(400, 'Prazo inválido');
+  const dateOnly = date => new Date(date).toISOString().slice(0, 10);
+  if (dateOnly(due) < dateOnly(project.startDate) || (project.endDate && dateOnly(due) > dateOnly(project.endDate))) {
+    throw httpError(400, 'O prazo da tarefa não pode estar fora do período do projeto');
+  }
+  return due;
+}
+function validateAssignee(assigneeId, project) {
+  if (!assigneeId) return null;
+  const users = [project.manager, ...project.members];
+  if (typeof assigneeId !== 'string' || !users.some(user => user?.id === assigneeId && user.active)) throw httpError(400, 'O responsável deve ser membro ou gerente ativo do projeto');
+  return assigneeId;
+}
+
 // POST /api/tasks
 exports.create = async (req, res) => {
   try {
-    const { title, description, projectId, assigneeId, status, priority, dueDate } = req.body;
-    if (!title || !projectId) return res.status(400).json({ message: 'Título e projeto são obrigatórios' });
-
-    const project = await prisma.project.findUnique({ where: { id: projectId } });
-    if (!project) return res.status(404).json({ message: 'Projeto não encontrado' });
-
-    if (dueDate) {
-      const taskDueDate = new Date(dueDate);
-      taskDueDate.setUTCHours(0, 0, 0, 0);
-      const projectStart = new Date(project.startDate);
-      projectStart.setUTCHours(0, 0, 0, 0);
-      let projectEnd = null;
-      if (project.endDate) {
-        projectEnd = new Date(project.endDate);
-        projectEnd.setUTCHours(0, 0, 0, 0);
-      }
-      if (taskDueDate < projectStart || (projectEnd && taskDueDate > projectEnd)) {
-        const format = d => `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
-        return res.status(400).json({ 
-          message: `O prazo da tarefa não pode estar fora do período do projeto (${format(projectStart)}${projectEnd ? ` a ${format(projectEnd)}` : ' em diante'}).` 
-        });
-      }
-    }
-
-    const newTask = await prisma.task.create({
-      data: {
-        title,
-        description: description || '',
-        projectId,
-        assigneeId: assigneeId || null,
-        status: status || 'a_fazer',
-        priority: priority || 'media',
-        dueDate: dueDate ? new Date(dueDate) : null,
-        activities: {
-          create: {
-            userId: req.user.id,
-            action: 'criou a tarefa',
-            target: title,
-            projectId: projectId
-          }
-        }
-      }
+    const { title, description, projectId, assigneeId, status = 'a_fazer', priority = 'media', dueDate } = req.body;
+    if (typeof title !== 'string' || !title.trim() || !projectId) throw httpError(400, 'Título e projeto são obrigatórios');
+    if (!VALID_TASK_STATUSES.includes(status)) throw httpError(400, 'Status inválido');
+    const newTask = await projectTransaction(prisma, projectId, async tx => {
+      const { project } = await loadProject(tx, projectId, req.user, { manage: true });
+      const newTask = await tx.task.create({ data: {
+        title: title.trim(), description: description || '', projectId,
+        assigneeId: validateAssignee(assigneeId, project), status, priority,
+        dueDate: validateDueDate(dueDate, project),
+        activities: { create: { userId: req.user.id, action: 'criou a tarefa', target: title.trim(), projectId } },
+      } });
+      if (status === 'concluido') await assertCanComplete(tx, newTask.id, projectId);
+      if (newTask.assigneeId) await tx.notification.create({ data: {
+        content: `Uma nova tarefa foi delegada a você: "${newTask.title}"`, userId: newTask.assigneeId, taskId: newTask.id, projectId,
+      } });
+      await checkImmediateDeadline(newTask, tx);
+      await recalcProjectProgress(tx, projectId);
+      return newTask;
     });
-
-    if (assigneeId) {
-      await prisma.notification.create({
-        data: {
-          content: `Uma nova tarefa foi delegada a você: "${title}"`,
-          userId: assigneeId,
-          taskId: newTask.id,
-          projectId: projectId
-        }
-      });
-    }
-
-    await checkImmediateDeadline(newTask);
-
-    await recalcProgress(projectId);
-
     res.status(201).json(newTask);
-  } catch (err) {
-    res.status(500).json({ message: 'Erro interno' });
-  }
+  } catch (error) { return sendError(res, error); }
 };
+
+async function updateTask(req, statusOnly) {
+  const original = await prisma.task.findUnique({ where: { id: req.params.id } });
+  if (!original) throw httpError(404, 'Tarefa não encontrada');
+  return projectTransaction(prisma, original.projectId, async tx => {
+    const { project } = await loadProject(tx, original.projectId, req.user);
+    const task = await requireTask(tx, original.projectId, req.params.id);
+    if (!canEditTask(req.user, task, project)) throw httpError(403, 'Sem permissão para editar esta tarefa');
+    const data = {};
+    const fields = statusOnly ? ['status'] : ['title', 'description', 'assigneeId', 'status', 'priority', 'dueDate'];
+    fields.forEach(field => { if (req.body[field] !== undefined) data[field] = req.body[field]; });
+    if ((statusOnly || data.status !== undefined) && !VALID_TASK_STATUSES.includes(data.status)) throw httpError(400, 'Status inválido');
+    if (data.title !== undefined && (typeof data.title !== 'string' || !data.title.trim())) throw httpError(400, 'Título é obrigatório');
+    if (data.assigneeId !== undefined) data.assigneeId = validateAssignee(data.assigneeId, project);
+    if (data.dueDate !== undefined) data.dueDate = validateDueDate(data.dueDate, project);
+    if (data.status === 'concluido') await assertCanComplete(tx, task.id, task.projectId);
+    const updatedTask = await tx.task.update({ where: { id: task.id }, data: {
+      ...data,
+      activities: { create: {
+        userId: req.user.id,
+        action: statusOnly ? `moveu "${task.title}" para` : 'atualizou a tarefa',
+        target: statusOnly ? data.status.replace('_', ' ') : data.title || task.title,
+        projectId: task.projectId,
+      } },
+    } });
+    if (data.assigneeId && data.assigneeId !== task.assigneeId) await tx.notification.create({ data: {
+      content: `Uma tarefa foi delegada a você: "${updatedTask.title}"`, userId: data.assigneeId, taskId: task.id, projectId: task.projectId,
+    } });
+    if (!statusOnly) await checkImmediateDeadline(updatedTask, tx);
+    await recalcProjectProgress(tx, task.projectId);
+    await notifyDependents(tx, task, updatedTask);
+    return updatedTask;
+  });
+}
 
 // PUT /api/tasks/:id
 exports.update = async (req, res) => {
-  try {
-    const task = await prisma.task.findUnique({ where: { id: req.params.id } });
-    if (!task) return res.status(404).json({ message: 'Tarefa não encontrada' });
-
-    const canEdit = [ROLES.ADMIN_PLATFORM, ROLES.ADMIN_COMPANY, ROLES.MANAGER_AREA, ROLES.PROJECT_MANAGER].includes(req.user.role)
-      || task.assigneeId === req.user.id;
-    if (!canEdit) return res.status(403).json({ message: 'Sem permissão para editar esta tarefa' });
-
-    const data = {};
-    const fields = ['title', 'description', 'assigneeId', 'status', 'priority', 'dueDate'];
-    fields.forEach(f => { if (req.body[f] !== undefined) data[f] = req.body[f]; });
-
-    if (data.dueDate) {
-      const project = await prisma.project.findUnique({ where: { id: task.projectId } });
-      const taskDueDate = new Date(data.dueDate);
-      taskDueDate.setUTCHours(0, 0, 0, 0);
-      const projectStart = new Date(project.startDate);
-      projectStart.setUTCHours(0, 0, 0, 0);
-      let projectEnd = null;
-      if (project.endDate) {
-        projectEnd = new Date(project.endDate);
-        projectEnd.setUTCHours(0, 0, 0, 0);
-      }
-      if (taskDueDate < projectStart || (projectEnd && taskDueDate > projectEnd)) {
-        const format = d => `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
-        return res.status(400).json({ 
-          message: `O prazo da tarefa não pode estar fora do período do projeto (${format(projectStart)}${projectEnd ? ` a ${format(projectEnd)}` : ' em diante'}).` 
-        });
-      }
-      data.dueDate = new Date(data.dueDate);
-    } else if (data.dueDate === null) {
-      data.dueDate = null;
-    }
-
-    const updatedTask = await prisma.task.update({
-      where: { id: req.params.id },
-      data: {
-        ...data,
-        activities: {
-          create: {
-            userId: req.user.id,
-            action: 'atualizou a tarefa',
-            target: data.title || task.title,
-            projectId: task.projectId
-          }
-        }
-      }
-    });
-
-    if (data.assigneeId && data.assigneeId !== task.assigneeId) {
-      await prisma.notification.create({
-        data: {
-          content: `Uma tarefa foi delegada a você: "${updatedTask.title}"`,
-          userId: data.assigneeId,
-          taskId: updatedTask.id,
-          projectId: updatedTask.projectId
-        }
-      });
-    }
-
-    await checkImmediateDeadline(updatedTask);
-
-    await recalcProgress(task.projectId);
-
-    res.json(updatedTask);
-  } catch (err) {
-    res.status(500).json({ message: 'Erro interno' });
-  }
+  try { res.json(await updateTask(req, false)); } catch (error) { return sendError(res, error); }
 };
 
 // PATCH /api/tasks/:id/status
 exports.updateStatus = async (req, res) => {
-  try {
-    const task = await prisma.task.findUnique({ where: { id: req.params.id } });
-    if (!task) return res.status(404).json({ message: 'Tarefa não encontrada' });
-
-    const { status } = req.body;
-    const validStatuses = ['a_fazer', 'em_andamento', 'concluido'];
-    if (!validStatuses.includes(status)) return res.status(400).json({ message: 'Status inválido' });
-
-    const updatedTask = await prisma.task.update({
-      where: { id: req.params.id },
-      data: {
-        status,
-        activities: {
-          create: {
-            userId: req.user.id,
-            action: `moveu "${task.title}" para`,
-            target: status.replace('_', ' '),
-            projectId: task.projectId
-          }
-        }
-      }
-    });
-
-    await recalcProgress(task.projectId);
-
-    res.json(updatedTask);
-  } catch (err) {
-    res.status(500).json({ message: 'Erro interno' });
-  }
+  try { res.json(await updateTask(req, true)); } catch (error) { return sendError(res, error); }
 };
 
 // DELETE /api/tasks/:id
