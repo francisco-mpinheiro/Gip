@@ -74,7 +74,8 @@ exports.getAll = async (req, res) => {
       include: {
         assignee: { select: { id: true, name: true, avatar: true } },
         project: { select: { id: true, name: true } },
-        attachments: true
+        attachments: true,
+        _count: { select: { comments: true, attachments: true } }
       }
     });
 

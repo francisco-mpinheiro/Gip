@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatDateLocal } from '../utils/dateUtils';
 import { rankMembersForTask } from '../utils/smartAssign';
 import SmartAssignRecommendations from '../components/SmartAssignRecommendations';
+import { TaskCardAssignee, TaskCardCounts } from '../components/TaskCardContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -24,7 +25,7 @@ function isOverdue(task) {
 export default function ProjectDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { canDo } = useAuth();
+  const { user, canDo } = useAuth();
   const [project, setProject] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -304,9 +305,8 @@ export default function ProjectDetailPage() {
                     </div>
                     <div className="kanban-card-footer">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {assignee && (
-                          <div className="avatar sm" style={{ overflow: 'hidden' }} title={assignee.name}>{assignee.avatar?.startsWith('/uploads/') ? <img src={assignee.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : assignee.avatar}</div>
-                        )}
+                        <TaskCardAssignee assignee={assignee} onAssign={canDo('create_task') && (user.role !== 'project_manager' || project.managerId === user.id) ? () => openEditTask(task) : undefined} />
+                        <TaskCardCounts counts={task._count} />
                         {task.dueDate && (
                           <span className={`kanban-card-date ${overdue ? 'overdue' : ''}`}>
                             <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(task.dueDate, { day: '2-digit', month: 'short' })}

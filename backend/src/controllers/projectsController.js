@@ -68,7 +68,8 @@ exports.getById = async (req, res) => {
         },
         tasks: {
           include: {
-            assignee: { select: { id: true, name: true, avatar: true } }
+            assignee: { select: { id: true, name: true, avatar: true } },
+            _count: { select: { comments: true, attachments: true } }
           }
         }
       }

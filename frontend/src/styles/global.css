@@ -1174,3 +1174,15 @@ tr:hover td { background: var(--accent-blue-dim); }
 
 .team-education-cell { min-width: 180px; max-width: 280px; }
 .team-workload-cell { min-width: 190px; }
+
+.task-card-assignee { overflow: hidden; }
+.task-card-assignee img { width: 100%; height: 100%; object-fit: cover; }
+.task-card-counts { display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 12px; }
+.task-card-counts > span { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.task-assign-button { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; border: 1px dashed var(--border); background: var(--accent-blue-dim); color: var(--accent-blue); font-size: 11px; font-weight: 500; }
+.task-assign-button .material-symbols-outlined { font-size: 15px; }
+.task-assign-button:hover { border-color: var(--accent-blue); }
+.task-unassigned { color: var(--text-muted); font-size: 11px; }
+.kanban-card-footer { gap: 8px; }
+.kanban-card-footer > div:first-child { flex-wrap: wrap; min-width: 0; }
+.kanban-card-footer > button, .kanban-card-footer > div:last-child:not(:first-child) { flex-shrink: 0; }

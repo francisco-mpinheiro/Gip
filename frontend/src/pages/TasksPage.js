@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatDateLocal } from '../utils/dateUtils';
 import { rankMembersForTask } from '../utils/smartAssign';
 import SmartAssignRecommendations from '../components/SmartAssignRecommendations';
+import { TaskCardAssignee, TaskCardCounts } from '../components/TaskCardContext';
 
 const STATUS_LABEL = { a_fazer: 'A Fazer', em_andamento: 'Em Andamento', concluido: 'Concluído' };
 const STATUS_CLASS = { a_fazer: 'badge-a_fazer', em_andamento: 'badge-em_andamento', concluido: 'badge-concluido' };
@@ -99,6 +100,7 @@ export default function TasksPage() {
     try {
       await tasksAPI.addComment(viewingTask.id, newComment);
       setNewComment('');
+      setTasks(previous => previous.map(task => task.id === viewingTask.id ? { ...task, _count: { ...task._count, comments: (task._count?.comments || 0) + 1 } } : task));
       loadComments(viewingTask.id);
     } catch (err) {
       alert(err.response?.data?.message || 'Erro ao adicionar comentário');
@@ -300,7 +302,8 @@ export default function TasksPage() {
                   </div>
                   <div className="kanban-card-footer">
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      {t.assignee && <div className="avatar sm" style={{ overflow: 'hidden' }} title={t.assignee.name}>{t.assignee.avatar?.startsWith('/uploads/') ? <img src={t.assignee.avatar} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : t.assignee.avatar}</div>}
+                      <TaskCardAssignee assignee={t.assignee} onAssign={canDo('create_task') && (user.role !== 'project_manager' || projects.some(p => p.id === t.projectId && p.managerId === user.id)) ? () => openEdit(t) : undefined} />
+                      <TaskCardCounts counts={t._count} />
                       {t.dueDate && (
                         <span className={`kanban-card-date ${t.overdue ? 'overdue' : ''}`}>
                           <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: 'middle', marginRight: 2 }}>schedule</span> {formatDateLocal(t.dueDate, { day: '2-digit', month: 'short' })}
