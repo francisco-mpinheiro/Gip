@@ -15,7 +15,7 @@ exports.getProfile = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
     if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
-    const { password, ...safe } = user;
+    const { password, resetToken, resetTokenExpiry, emailToken, emailTokenExpiry, ...safe } = user;
     res.json(safe);
   } catch (err) {
     res.status(500).json({ message: 'Erro interno' });
@@ -86,7 +86,7 @@ exports.updateProfile = async (req, res) => {
     delete parsed.data.role;
 
     const updatedUser = await prisma.user.update({ where: { id: req.user.id }, data });
-    const { password, ...safe } = updatedUser;
+    const { password, resetToken, resetTokenExpiry, emailToken, emailTokenExpiry, ...safe } = updatedUser;
     res.json(safe);
   } catch (err) {
     console.error(err);

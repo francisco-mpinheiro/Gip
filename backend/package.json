@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed": "node src/utils/seed.js"
+    "seed": "node src/utils/seed.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
+import MemberInsights from './MemberInsights';
 import { usersAPI, chatAPI } from '../utils/api';
 import { useAuth, ROLE_LABELS } from '../context/AuthContext';
 
@@ -165,6 +166,7 @@ export default function UserDrawer({ userId, onClose }) {
           
           {activeTab === 'perfil' && (
             <div className="drawer-content">
+              <MemberInsights user={targetUser} />
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Contato</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>

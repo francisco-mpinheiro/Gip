@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const { ROLES } = require('../config/database');
 const prisma = require('../config/prisma');
 
-const sanitizeUser = (user) => { const { password, ...safe } = user; return safe; };
+const sanitizeUser = (user) => { const { password, resetToken, resetTokenExpiry, emailToken, emailTokenExpiry, ...safe } = user; return safe; };
 
 // GET /api/users
 exports.getAll = async (req, res) => {
@@ -40,7 +40,7 @@ exports.getById = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ 
       where: { id: req.params.id },
-      include: { educations: true }
+      include: { educations: true, tasks: { select: { id: true, status: true } } }
     });
     if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
     res.json(sanitizeUser(user));

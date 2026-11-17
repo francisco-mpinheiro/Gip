@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authAPI } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 
 const FEATURES = [
@@ -75,7 +76,7 @@ export default function LoginPage() {
                 width="16"
                 height="16"
                 fill="currentColor"
-                class="bi bi-person-workspace"
+                className="bi bi-person-workspace"
                 viewBox="0 0 16 16"
               >
                 <path d="M4 16s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-5.95a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
@@ -134,12 +135,12 @@ export default function LoginPage() {
           </div>
 
           <h2 style={css.cardTitle}>
-            {mode === "login" ? "Bem-vindo" : "Criar Conta"}
+            {mode === "login" ? "Bem-vindo" : mode === "forgot" ? "Recuperar senha" : "Criar Conta"}
           </h2>
           <p style={css.cardSub}>
             {mode === "login"
               ? "Entre na sua conta para continuar"
-              : "Junte-se ao GIP hoje"}
+              : mode === "forgot" ? "Informe seu e-mail para recuperar o acesso" : "Junte-se ao GIP hoje"}
           </p>
 
           {/* Tabs */}
@@ -217,7 +218,7 @@ export default function LoginPage() {
                     <input type="checkbox" style={{ marginRight: 6 }} />
                     Lembrar de mim
                   </label>
-                  <span style={css.forgot}>Esqueceu a senha?</span>
+                  <button type="button" style={{ ...css.forgot, background: "none", border: "none", padding: 0 }} onClick={() => setMode("forgot")}>Esqueceu a senha?</button>
                 </div>
 
                 <button style={css.submitBtn} type="submit" disabled={loading}>
@@ -252,6 +253,8 @@ export default function LoginPage() {
                 <div style={css.demoNote}>Senha: 123456 para todos</div>
               </div>
             </>
+          ) : mode === "forgot" ? (
+            <ForgotPassword onBack={() => setMode("login")} />
           ) : (
             <RegisterForm
               onSuccess={() => navigate("/dashboard")}
@@ -273,9 +276,9 @@ function ForgotPassword({ onBack }) {
   const handle = async (e) => {
     e.preventDefault(); setErr(''); setMsg(''); setLoading(true);
     try {
-      await fetch('/api/auth/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-      setMsg('Se o email existir, um link foi enviado (verifique logs em dev)');
-    } catch (e) { setErr('Erro ao processar'); }
+      const { data } = await authAPI.forgotPassword({ email });
+      setMsg(data.message);
+    } catch (e) { setErr(e.response?.data?.message || 'Não foi possível solicitar a recuperação. Tente novamente.'); }
     setLoading(false);
   };
 

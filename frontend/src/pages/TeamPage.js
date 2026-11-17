@@ -4,6 +4,7 @@ import { usersAPI } from '../utils/api';
 import { ROLE_LABELS } from '../context/AuthContext';
 import { useAuth } from '../context/AuthContext';
 import UserDrawer from '../components/UserDrawer';
+import MemberInsights, { EducationTags, WorkloadBadge } from '../components/MemberInsights';
 
 const DEPT_COLORS = {
   'TI': 'var(--accent-blue)', 'Desenvolvimento': 'var(--accent-purple)', 'Design': 'var(--accent-pink)',
@@ -138,6 +139,8 @@ export default function TeamPage() {
                   <th>Departamento</th>
                   <th>Email</th>
                   <th>Status</th>
+                  <th>Formações</th>
+                  <th>Carga de trabalho</th>
                 </tr>
               </thead>
               <tbody>
@@ -164,6 +167,8 @@ export default function TeamPage() {
                         </span>
                       </div>
                     </td>
+                    <td className="team-education-cell"><EducationTags educations={u.educations || []} /></td>
+                    <td className="team-workload-cell"><WorkloadBadge tasks={u.tasks} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -189,6 +194,7 @@ function MemberCard({ user, onClick }) {
         <div className="team-name">{user.name}</div>
         <div className="team-role-label">{ROLE_LABELS[user.role]}</div>
         <div className="team-dept">{user.department} · {user.email}</div>
+        <MemberInsights user={user} />
       </div>
       <div className={`team-status ${user.active ? 'active' : 'inactive'}`} title={user.active ? 'Ativo' : 'Inativo'} />
     </div>

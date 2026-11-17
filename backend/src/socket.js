@@ -35,24 +35,9 @@ const initSocket = (server) => {
         const { receiverId, content } = data;
         
         // Save to database
-        let message;
-        if (prisma.message) {
-          message = await prisma.message.create({
-            data: {
-              content,
-              senderId: socket.user.id,
-              receiverId
-            }
-          });
-        } else {
-          const id = require('crypto').randomUUID();
-          await prisma.$executeRaw`
-            INSERT INTO messages (id, content, "senderId", "receiverId", "createdAt", "isRead") 
-            VALUES (${id}, ${content}, ${socket.user.id}, ${receiverId}, NOW(), false)
-          `;
-          const rawResult = await prisma.$queryRaw`SELECT * FROM messages WHERE id = ${id}`;
-          message = rawResult[0];
-        }
+        const message = await prisma.message.create({
+          data: { content, senderId: socket.user.id, receiverId }
+        });
 
         // Emit to receiver's room
         io.to(receiverId).emit('receive_message', message);

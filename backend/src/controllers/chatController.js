@@ -5,25 +5,13 @@ exports.getHistory = async (req, res) => {
     const userId = req.user.id;
     const otherUserId = req.params.userId;
 
-    let messages = [];
-    if (prisma.message) {
-      messages = await prisma.message.findMany({
-        where: {
-          OR: [
-            { senderId: userId, receiverId: otherUserId },
-            { senderId: otherUserId, receiverId: userId }
-          ]
-        },
-        orderBy: { createdAt: 'asc' }
-      });
-    } else {
-      messages = await prisma.$queryRaw`
-        SELECT * FROM messages 
-        WHERE ("senderId" = ${userId} AND "receiverId" = ${otherUserId})
-           OR ("senderId" = ${otherUserId} AND "receiverId" = ${userId})
-        ORDER BY "createdAt" ASC
-      `;
-    }
+    const messages = await prisma.message.findMany({
+      where: { OR: [
+        { senderId: userId, receiverId: otherUserId },
+        { senderId: otherUserId, receiverId: userId }
+      ] },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }]
+    });
 
     res.json(messages);
   } catch (err) {

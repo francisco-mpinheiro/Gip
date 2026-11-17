@@ -10,7 +10,7 @@ const generateToken = (user) =>
   });
 
 const sanitizeUser = (user) => {
-  const { password, ...safe } = user;
+  const { password, resetToken, resetTokenExpiry, emailToken, emailTokenExpiry, ...safe } = user;
   return safe;
 };
 

@@ -1160,3 +1160,17 @@ tr:hover td { background: var(--accent-blue-dim); }
 .reset-password-page { background: var(--card-surface); border-radius: var(--radius-lg); outline: 1px solid var(--border); box-shadow: var(--shadow); }
 .reset-password-page h2 { letter-spacing: -0.025em; }
 .reset-password-page label { color: var(--text-secondary); }
+
+.member-insights { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 10px; }
+.workload-badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; flex-wrap: wrap; }
+.workload-green { color: var(--accent-green); background: var(--status-green-bg); }
+.workload-amber { color: var(--accent-amber); background: var(--status-amber-bg); }
+.workload-red { color: var(--accent-red); background: var(--status-red-bg); }
+.workload-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.education-tags { display: flex; flex-wrap: wrap; gap: 5px; min-width: 0; }
+.education-tag { border-radius: 5px; padding: 3px 7px; color: var(--accent-blue); background: var(--accent-blue-dim); font-size: 11px; overflow-wrap: anywhere; }
+.education-empty { font-size: 11px; color: var(--text-muted); }
+.drawer-content > .member-insights { margin: 0 0 24px; }
+
+.team-education-cell { min-width: 180px; max-width: 280px; }
+.team-workload-cell { min-width: 190px; }
